@@ -1,0 +1,23 @@
+{
+  "name": "basecamp",
+  "version": "1.0.0",
+  "description": "Codenamed basecamp: WIP --- Will rename once released",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AirFusion45/basecamp.git"
+  },
+  "author": "AirFusion45",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AirFusion45/basecamp/issues"
+  },
+  "homepage": "https://github.com/AirFusion45/basecamp#readme",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "request": "^2.88.2"
+  }
+}
