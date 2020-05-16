@@ -1,10 +1,15 @@
 const cheerio = require('cheerio')
 const request = require('request')
 request(`https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg`, (err, res, html) => {
+    // https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
+    // https://hspolicy.debatecoaches.org/Dulles/Dawar-Joshi%20Neg
+    // test link: https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg
+    // https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Dua-Ray%20Neg
     const $ = cheerio.load(html)
     var rounds = []
     var twoNRs = []
     var twoNRsfrequency = []
+    // main value entering loop  
     for (var i = 1; i < $("#tblReports tr").length; i++) { //1
         var obj = {
             tournament: "",
@@ -69,24 +74,132 @@ request(`https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20
         // console.log(roundStrClean)
 
         // 1AC
-        obj.oneAC = roundStrClean.substring(roundStrClean.indexOf("1AC") + 4, roundStrClean.indexOf("<br>"))
-        roundStrClean = roundStrClean.substring(roundStrClean.indexOf("<br>") + 4)
+        if (roundStrClean.includes("<br>")) {
+            obj.oneAC = roundStrClean.substring(roundStrClean.indexOf("1AC") + 4, roundStrClean.indexOf("<br>"))
+            roundStrClean = roundStrClean.substring(roundStrClean.indexOf("<br>") + 4)
+        } else if (roundStrClean.includes("<p>")) {
+            obj.oneAC = roundStrClean.substring(roundStrClean.indexOf("1AC") + 4, roundStrClean.indexOf("<p>"))
+            roundStrClean = roundStrClean.substring(roundStrClean.indexOf("<p>") + 3)
+        }
+
+        //clean any - in str
+        obj.oneAC = obj.oneAC.substring(obj.oneAC.indexOf(obj.oneAC.match('[a-zA-Z]')))
+        // roundStrClean = roundStrClean.substring(roundStrClean.indexOf(roundStrClean.match('[a-zA-Z]')))
+
 
         // 1NC
         if (roundStr.includes('1NC')) {
-            roundStrClean =  roundStrClean.replace("1NC", "")
+            roundStrClean = roundStrClean.replace("1NC", "")
             if (roundStr.includes('2NR')) {
-                var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR'))
-                console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')))
+                if (roundStrClean.includes('<br>')) {
+                    var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR'))
+                } else if (roundStrClean.includes("</p>")) {
+                    var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('</p><p>2NR'))
+                }
+                // console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')))
             } else {
                 var ncArrayStrTemp = roundStrClean
             }
-            obj.oneNC = ncArrayStrTemp.split("<br>- ")
-            obj.oneNC.splice(0,1)
+            obj.oneNC = ncArrayStrTemp.split("<br>- ") // Doenst work for <p> wikis
+
+            // clean any - in each str element of array & remove space before/after text
+            for (var x = 0; x < obj.oneNC.length; x++) {
+                obj.oneNC[x] = obj.oneNC[x].substring(obj.oneNC[x].indexOf(obj.oneNC[x].match('[a-zA-Z]')))
+                obj.oneNC[x] = obj.oneNC[x].trim()
+            }
+
+            if (obj.oneNC[0] === "") {
+                obj.oneNC.splice(0, 1)
+            }
         }
-        console.log(obj)
+
+        // 2NR
+        if (roundStr.includes('2NR')) {
+            if (roundStrClean.includes('<br>')) {
+                roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR') + 7), "")
+                // console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')+7))
+                obj.twoNR = roundStrClean.split("<br>- ")
+            } else if (roundStrClean.includes("</p>")) {
+                roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<p>2NR') + 7), "")
+                // obj.twoNR = roundStrClean.split("<br>- ")
+
+                obj.twoNR = roundStrClean.split("- ")
+
+                for (var z = 0; z < obj.twoNR.length - 1; z++) { // this maybe (prob) is buggy
+                    // var lenUpdate = 0
+                    // while (true) {
+                    if (obj.twoNR[z].includes("and")) {
+                        var tempBreakStorage = obj.twoNR[z]
+                        obj.twoNR[z] = tempBreakStorage.substring(0, tempBreakStorage.indexOf("and"))
+                        obj.twoNR.splice(z + 1, 0, tempBreakStorage.substring(tempBreakStorage.indexOf("and") + 3))
+                        // z++;
+                    }
+                    // }
+                }
+
+            }
+
+            // clean any - in each str element of array & remove space before/after text
+            for (var x = 0; x < obj.twoNR.length; x++) {
+                obj.twoNR[x] = obj.twoNR[x].substring(obj.twoNR[x].indexOf(obj.twoNR[x].match('[a-zA-Z]')))
+                obj.twoNR[x] = obj.twoNR[x].trim()
+                if (obj.twoNR[x].includes("</p>")) {
+                    obj.twoNR[x] = obj.twoNR[x].replace("</p>", "")
+                }
+            }
+
+            if (obj.twoNR[0] === "") {
+                obj.twoNR.splice(0, 1)
+            }
+        }
+
+        rounds.push(obj)
+
     }
 
+    // Troll detection & removal
+    for (var i = 0; i < rounds.length; i++) {
+        if (rounds[i].troll) {
+            rounds.splice(i, 1)
+        }
+    }
+    console.log(rounds)
+
+    // move all args into 1 array
+    for (var i = 0; i < rounds.length; i++) {
+        for (j = 0; j < rounds[i].twoNR.length; j++) {
+            twoNRs.push(rounds[i].twoNR[j])
+        }
+    }
+    // console.log(twoNRs)
+    // console.log(twoNRs)
+    // console.log(twoNRs)
+    // find most occurence of 2nr args
+
+    // for (var i = 0; i < twoNRs.length; i++) {
+    var occurenceNum = []
+    while (twoNRs.length != 0) {
+        // var strtoInput = twoNRs[0]
+        var occurence = 0
+        var searchingFor = twoNRs[0]
+
+        for (var j = 0; j < twoNRs.length; j++) {
+            if (twoNRs[j].includes(searchingFor) || searchingFor.includes(twoNRs[j])) { // check for spelling errors
+                occurence++;
+                twoNRs.splice(j, 1)
+            }
+        }
+        twoNRsfrequency.push(searchingFor)
+        occurenceNum.push(occurence)
+        // }
+    }
+    // console.log(twoNRsfrequency)
+    // console.log(occurenceNum)
+    for (var i = 0; i < occurenceNum.length; i++) {
+        if (occurenceNum[i] === Math.max(...occurenceNum)) {
+            console.log(`Most occuring arg: ${twoNRsfrequency[i]} at ${occurenceNum[i]} times`)
+        }
+    }
 })
 
 // var missingOneAC = false
