@@ -18,6 +18,9 @@
   "homepage": "https://github.com/AirFusion45/basecamp#readme",
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "request": "^2.88.2"
+    "detergent": "^5.10.4",
+    "request": "^2.88.2",
+    "string-strip-html": "^4.4.5",
+    "superagent": "^5.2.2"
   }
 }
