@@ -1,10 +1,7 @@
 const cheerio = require('cheerio')
 const request = require('request')
-request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg`, (err, res, html) => {
-    // https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
-    // https://hspolicy.debatecoaches.org/Dulles/Dawar-Joshi%20Neg
-    // test link: https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg
-    // https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Dua-Ray%20Neg
+request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg`, (err, res, html) => {
+
     const $ = cheerio.load(html)
     var rounds = []
     var twoNRs = []
@@ -24,10 +21,12 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Ba
         var roundStr = $("#tblReports tr").eq(i).text()
         roundStr = roundStr.replace("1ac", "1AC")
         roundStr = roundStr.replace("1nc", "1NC")
+        roundStr = roundStr.replace('2ac', "2NC")
         roundStr = roundStr.replace("2nc", "2NC")
         roundStr = roundStr.replace("1nr", "1NR")
         roundStr = roundStr.replace("2nr", "2NR")
         roundStr = roundStr.replace("2ar", "2AR")
+        roundStr = roundStr.replace(/AND/g, 'and')
         var tempStrTournRound = roundStr.substring(0, roundStr.indexOf("Opponent"))
         // console.log(roundStr)
 
@@ -79,10 +78,12 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Ba
         var roundStrClean = $('#tblReports tr').eq(i).find("td").eq(2).find('div').find('div').html().replace("<p>", "").replace("</p>", "");
         roundStrClean = roundStrClean.replace("1ac", "1AC")
         roundStrClean = roundStrClean.replace("1nc", "1NC")
+        roundStrClean = roundStrClean.replace('2ac', "2NC")
         roundStrClean = roundStrClean.replace("2nc", "2NC")
         roundStrClean = roundStrClean.replace("1nr", "1NR")
         roundStrClean = roundStrClean.replace("2nr", "2NR")
         roundStrClean = roundStrClean.replace("2ar", "2AR")
+        roundStrClean = roundStrClean.replace(/AND/g, 'and')
         console.log(roundStrClean)
 
         // 1AC
@@ -104,7 +105,13 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Ba
             roundStrClean = roundStrClean.replace("1NC", "")
             if (roundStr.includes('2NR')) {
                 if (roundStrClean.includes('<br>')) {
-                    var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR'))
+                    if (roundStrClean.includes('2AC')) { // if there is a report for every speech
+                        var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2AC'))
+                    } else if (roundStrClean.includes('2NC')) {
+                        var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NC'))
+                    } else {
+                        var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR'))
+                    }
                 } else if (roundStrClean.includes("</p>")) {
                     var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('</p><p>2NR'))
                 }
@@ -112,21 +119,32 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Ba
             } else {
                 var ncArrayStrTemp = roundStrClean
             }
-            obj.oneNC = ncArrayStrTemp.split("<br>- ") // Doenst work for <p> wikis
+            // obj.oneNC = ncArrayStrTemp.split("<br>- ") // Doenst work for <p> wikis
 
+            // if has and or , split there
+            if (ncArrayStrTemp.includes("and")) {
+                obj.oneNC = ncArrayStrTemp.split('and')
+            } else if (ncArrayStrTemp.includes(',')) {
+                obj.oneAC = ncArrayStrTemp(',')
+            } else {
+                obj.oneNC = ncArrayStrTemp.split("<br>- ") // 
+            }
             // clean any - in each str element of array & remove space before/after text
             for (var x = 0; x < obj.oneNC.length; x++) {
                 obj.oneNC[x] = obj.oneNC[x].substring(obj.oneNC[x].indexOf(obj.oneNC[x].match('[a-zA-Z]')))
                 obj.oneNC[x] = obj.oneNC[x].trim()
             }
 
-            if (obj.oneNC[0] === "") {
+            if (obj.oneNC[0] === "") {  // remove blanks in str
                 obj.oneNC.splice(0, 1)
             }
 
             // update roundstrclean to have 2NRs only
             if (roundStrClean.includes("<br>")) {
                 roundStrClean = roundStrClean.substring(roundStrClean.indexOf("<br>2NR") + 7)
+                if (roundStrClean.includes("2AR")) {
+                    roundStrClean = roundStrClean.substring(0, roundStrClean.indexOf("<br>2AR"))
+                }
             } else if (roundStrClean.includes("<p>")) {
                 roundStrClean = roundStrClean.substring(roundStrClean.indexOf("<p>2NR") + 6)
             }

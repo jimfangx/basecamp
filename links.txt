@@ -1,0 +1,9 @@
+ALPHA:
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
+    https://hspolicy.debatecoaches.org/Dulles/Dawar-Joshi%20Neg
+    https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg
+    https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Dua-Ray%20Neg
+
+BETA:
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg
