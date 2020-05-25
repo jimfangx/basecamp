@@ -1,6 +1,6 @@
 const cheerio = require('cheerio')
 const request = require('request')
-request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg`, (err, res, html) => {
+request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, res, html) => {
 
     const $ = cheerio.load(html)
     var rounds = []
@@ -152,11 +152,11 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Se
 
         // 2NR
         if (roundStr.includes('2NR')) {
-            if (roundStrClean.includes('<br>')) {
+            if (roundStrClean.includes('<br>')) { // args seperated by line breaks
                 roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR') + 7), "")
                 // console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')+7))
                 obj.twoNR = roundStrClean.split("<br>- ")
-            } else if (roundStrClean.includes("</p>")) {
+            } else if (roundStrClean.includes("</p>")) { // args seperated by different paragraphs
                 roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<p>2NR') + 7), "")
                 // obj.twoNR = roundStrClean.split("<br>- ")
 
@@ -175,12 +175,31 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Se
                 }
 
             } else { // on the same line
-                if (!roundStrClean.includes(",") && !roundStrClean.includes("and")) { // same line 1 arg
-                    obj.twoNR = roundStrClean.substring(roundStrClean.indexOf("2NR") + 3).split()
-                } else if (roundStrClean.includes(",")) { // same line seperated by ,
+                if (roundStrClean.includes(",")) { // same line seperated by ,
                     obj.twoNR = roundStrClean.split(",")
                 } else if (roundStrClean.includes('and')) { // same line seperated by and
                     obj.twoNR = roundStrClean.split("and")
+                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && (roundStrClean.includes("CP") || roundStrClean.includes("cp")) && (roundStrClean.includes("DA") || roundStrClean.includes("da"))) {  // multiple args on one line, no seperator.
+                    roundStrClean.replace(/CP/g, "cp")
+                    roundStrClean.replace(/DA/g, "da")
+                    var multiArgSameLineTempArr = []
+                    while (roundStrClean.includes("cp") || roundStrClean.includes("da")) {
+                        var multiArgSameLineTempContent = ""
+                        if (roundStrClean.indexOf("cp") < roundStrClean.indexOf("da")) { // there is a cp before a da
+                            multiArgSameLineTempContent = roundStrClean.substring(0, roundStrClean.indexOf("cp") + 2)
+                            roundStrClean.replace(multiArgSameLineTempContent, "")
+                            multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                        } else if (roundStrClean.indexOf("da") < roundStrClean.indexOf("cp")) { // there is a da before a cp
+                            multiArgSameLineTempContent = roundStrClean.substring(0, roundStrClean.indexOf("da") + 2)
+                            roundStrClean.replace(multiArgSameLineTempContent, "")
+                            multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                        }
+                    }
+                    obj.twoNR = multiArgSameLineTempArr;
+                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && roundStrClean.includes("2NR")) { // same line 1 arg
+                    obj.twoNR = roundStrClean.substring(roundStrClean.indexOf("2NR") + 3).split()
+                } else {
+                    obj.twoNR = [roundStrClean]
                 }
             }
 
@@ -193,8 +212,16 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Se
                 }
             }
 
+            // clean empty elements
             if (obj.twoNR[0] === "") {
                 obj.twoNR.splice(0, 1)
+            }
+
+            // Check if 2nr is the same as 1nc args
+            if (obj.twoNR.length === 1) {
+                if (obj.twoNR[0] === "NC" || obj.twoNR[0] === "nc") {
+                    obj.twoNR = obj.oneNC
+                }
             }
         }
 
@@ -230,7 +257,10 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Se
         var searchingFor = twoNRs[0]
 
         for (var j = 1; j < twoNRs.length; j++) {
-            if (twoNRs[j].includes(searchingFor) || searchingFor.includes(twoNRs[j])) { // check for spelling errors
+            if (twoNRs[j].includes(searchingFor) && searchingFor.length > 4) { // check for spelling errors
+                occurence++;
+                twoNRs.splice(j, 1)
+            } else if (twoNRs[j] === searchingFor) {
                 occurence++;
                 twoNRs.splice(j, 1)
             }
@@ -246,6 +276,9 @@ request(`https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Se
         if (occurenceNum[i] === Math.max(...occurenceNum)) {
             console.log(`Most occuring arg: ${twoNRsfrequency[i]} at ${occurenceNum[i]} times`)
         }
+    }
+    if (occurenceNum.length === 0 || occurenceNum === undefined) {
+        console.log(`Round reports empty.`)
     }
 })
 

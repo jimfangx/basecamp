@@ -7,3 +7,4 @@ ALPHA:
 BETA:
     https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
     https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Fritchel-Lewis%20Neg
