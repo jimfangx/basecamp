@@ -1,6 +1,6 @@
 const cheerio = require('cheerio')
 const request = require('request')
-request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, res, html) => {
+request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (err, res, html) => {
 
     const $ = cheerio.load(html)
     var rounds = []
@@ -84,6 +84,8 @@ request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, r
         roundStrClean = roundStrClean.replace("2nr", "2NR")
         roundStrClean = roundStrClean.replace("2ar", "2AR")
         roundStrClean = roundStrClean.replace(/AND/g, 'and')
+        roundStrClean = roundStrClean.replace(/CP/g, "cp")
+        roundStrClean = roundStrClean.replace(/DA/g, "da")
         console.log(roundStrClean)
 
         // 1AC
@@ -175,25 +177,56 @@ request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, r
                 }
 
             } else { // on the same line
+                // Check if 2nr is the same as 1nc args
+                if (roundStrClean.includes("1NC") || roundStrClean.includes("1nc")) {
+                    // if (obj.twoNR[0] === "NC" || obj.twoNR[0] === "nc") {
+                    roundStrClean = obj.oneNC.join(" ")
+                    // }
+                }
+
                 if (roundStrClean.includes(",")) { // same line seperated by ,
                     obj.twoNR = roundStrClean.split(",")
                 } else if (roundStrClean.includes('and')) { // same line seperated by and
                     obj.twoNR = roundStrClean.split("and")
-                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && (roundStrClean.includes("CP") || roundStrClean.includes("cp")) && (roundStrClean.includes("DA") || roundStrClean.includes("da"))) {  // multiple args on one line, no seperator.
-                    roundStrClean.replace(/CP/g, "cp")
-                    roundStrClean.replace(/DA/g, "da")
+                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && roundStrClean.includes("cp") && roundStrClean.includes("da")) {  // multiple args on one line, no seperator.
                     var multiArgSameLineTempArr = []
                     while (roundStrClean.includes("cp") || roundStrClean.includes("da")) {
                         var multiArgSameLineTempContent = ""
-                        if (roundStrClean.indexOf("cp") < roundStrClean.indexOf("da")) { // there is a cp before a da
+                        if (roundStrClean.indexOf("cp") < roundStrClean.indexOf("da") && roundStrClean.includes('cp') && roundStrClean.includes('da')) { // there is a cp before a da
                             multiArgSameLineTempContent = roundStrClean.substring(0, roundStrClean.indexOf("cp") + 2)
-                            roundStrClean.replace(multiArgSameLineTempContent, "")
+                            roundStrClean = roundStrClean.replace(multiArgSameLineTempContent, "")
+                            roundStrClean = roundStrClean.trim()
                             multiArgSameLineTempArr.push(multiArgSameLineTempContent)
-                        } else if (roundStrClean.indexOf("da") < roundStrClean.indexOf("cp")) { // there is a da before a cp
+                        } else if (roundStrClean.indexOf("da") < roundStrClean.indexOf("cp") && roundStrClean.includes('cp') && roundStrClean.includes('da')) { // there is a da before a cp
                             multiArgSameLineTempContent = roundStrClean.substring(0, roundStrClean.indexOf("da") + 2)
-                            roundStrClean.replace(multiArgSameLineTempContent, "")
+                            roundStrClean = roundStrClean.replace(multiArgSameLineTempContent, "")
+                            roundStrClean = roundStrClean.trim()
                             multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                        } else { // only 1 arg  left
+                            roundStrClean = roundStrClean.trim()
+                            multiArgSameLineTempArr.push(roundStrClean)
+                            roundStrClean = roundStrClean.replace(roundStrClean, "")
                         }
+                    }
+                    obj.twoNR = multiArgSameLineTempArr;
+                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && (roundStrClean.match(/cp/g) || []).length > 1) { // more than one cp but no das
+                    var multiArgSameLineTempArr = []
+                    while (roundStrClean.includes('cp')) {
+                        var multiArgSameLineTempContent = ""
+                        multiArgSameLineTempContent = roundStrClean.substring(0, roundstrclean.indexOf('cp') + 2)
+                        roundStrClean = roundStrClean.replace(multiArgSameLineTempContent, "")
+                        roundStrClean = roundStrClean.trim()
+                        multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                    }
+                    obj.twoNR = multiArgSameLineTempArr;
+                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && (roundStrClean.match(/da/g) || []).length > 1) { // more than one da but no cps
+                    var multiArgSameLineTempArr = []
+                    while (roundStrClean.includes('da')) {
+                        var multiArgSameLineTempContent = ""
+                        multiArgSameLineTempContent = roundStrClean.substring(0, roundStrClean.indexOf('da') + 2)
+                        roundStrClean = roundStrClean.replace(multiArgSameLineTempContent, "")
+                        roundStrClean = roundStrClean.trim()
+                        multiArgSameLineTempArr.push(multiArgSameLineTempContent)
                     }
                     obj.twoNR = multiArgSameLineTempArr;
                 } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && roundStrClean.includes("2NR")) { // same line 1 arg
@@ -217,12 +250,6 @@ request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, r
                 obj.twoNR.splice(0, 1)
             }
 
-            // Check if 2nr is the same as 1nc args
-            if (obj.twoNR.length === 1) {
-                if (obj.twoNR[0] === "NC" || obj.twoNR[0] === "nc") {
-                    obj.twoNR = obj.oneNC
-                }
-            }
         }
 
         rounds.push(obj)
@@ -237,6 +264,13 @@ request(`https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg`, (err, r
     }
     console.log(rounds)
 
+
+    // Lowercase all the arguments ugh
+    for (var i = 0; i < rounds.length; i++) {
+        for (j = 0; j < rounds[i].twoNR.length; j++) {
+            rounds[i].twoNR[j] = rounds[i].twoNR[j].toLowerCase()
+        }
+    }
 
     // move all args into 1 array
     for (var i = 0; i < rounds.length; i++) {

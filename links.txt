@@ -5,6 +5,14 @@ ALPHA:
     https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Dua-Ray%20Neg
 
 BETA:
-    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
-    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg
-    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Fritchel-Lewis%20Neg
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg (Cap @ 2 | military futurology @ 2)
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg (Taiwan CP @ 2 | Pending issue: China deterrence & deterrence da mixes -> deterrence da was marked as china deterrence da in 1nc)
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Fritchel-Lewis%20Neg (Empty)
+    https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg (T-substantial @ 2, Houthi da @ 2)
+    https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg (t sub @ 2, double down cp at 2, t-substntial @ 2 ---> Aliais stuff)
+
+
+
+
+Stuffz to do in this function: 
+    Alias stuff? ref self-gentleman neg ATAcad & rich mathers airline (not documented in link)
