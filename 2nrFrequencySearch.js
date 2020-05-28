@@ -1,6 +1,7 @@
 const cheerio = require('cheerio')
 const request = require('request')
-request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (err, res, html) => {
+const link = `https://hspolicy.debatecoaches.org/Airline/Norman-MitchellWilson%20Neg`
+request(link, (err, res, html) => {
 
     const $ = cheerio.load(html)
     var rounds = []
@@ -20,6 +21,8 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
         }
         var roundStr = $("#tblReports tr").eq(i).text()
         roundStr = roundStr.replace("1ac", "1AC")
+        roundStr = roundStr.replace("AFF", "aff")
+        roundStr = roundStr.replace("Aff", "aff")
         roundStr = roundStr.replace("1nc", "1NC")
         roundStr = roundStr.replace('2ac', "2NC")
         roundStr = roundStr.replace("2nc", "2NC")
@@ -31,7 +34,7 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
         // console.log(roundStr)
 
         // troll marking
-        if (!roundStr.includes("1AC") || (!roundStr.includes("1NC") && !roundStr.includes("2NR"))) {
+        if (!roundStr.includes("1AC") && !roundStr.includes("aff") || (!roundStr.includes("1NC") && !roundStr.includes("2NR"))) {
             obj.troll = true
         } else {
             obj.troll = false
@@ -104,12 +107,19 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
 
         // 1NC
         if (roundStr.includes('1NC')) {
+            if (roundStrClean.includes('1NC') && roundStrClean.includes('2NR') && !roundStrClean.includes('<br>') && !roundStrClean.includes('<br/>') || !roundStrClean.includes('</br>')) { // 1nc and 2nr on the same line and the same args | Deal with it before the 1NC tag gets cut
+                if (roundStrClean.includes('1NC and 2NR')) { // using same args for both 1nc & 2nr
+                    var oneNCtwoNRsSameArgsSameLine = true;
+                    roundStrClean = roundStrClean.replace('1NC and', '')
+                    var ncArrayStrTemp = roundStrClean.replace('2NR', "");
+                }
+            }
             roundStrClean = roundStrClean.replace("1NC", "")
             if (roundStr.includes('2NR')) {
                 if (roundStrClean.includes('<br>')) {
                     if (roundStrClean.includes('2AC')) { // if there is a report for every speech
                         var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2AC'))
-                    } else if (roundStrClean.includes('2NC')) {
+                    } else if (roundStrClean.includes('2NC')) { // if there is a report for every speech
                         var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NC'))
                     } else {
                         var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR'))
@@ -118,7 +128,8 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
                     var ncArrayStrTemp = roundStrClean.substring(0, roundStrClean.indexOf('</p><p>2NR'))
                 }
                 // console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')))
-            } else {
+
+            } else { // last arguments are the 1nc.
                 var ncArrayStrTemp = roundStrClean
             }
             // obj.oneNC = ncArrayStrTemp.split("<br>- ") // Doenst work for <p> wikis
@@ -159,18 +170,23 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
                 // console.log(roundStrClean.substring(0, roundStrClean.indexOf('<br>2NR')+7))
                 obj.twoNR = roundStrClean.split("<br>- ")
             } else if (roundStrClean.includes("</p>")) { // args seperated by different paragraphs
-                roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<p>2NR') + 7), "")
+                if (roundStrClean.includes("<p>2NR")) {
+                    roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('<p>2NR') + 7), "")
+                } else {
+                    roundStrClean = roundStrClean.replace("</p>", "")
+                    roundStrClean = roundStrClean.replace("<p>", "")
+                }
                 // obj.twoNR = roundStrClean.split("<br>- ")
 
                 obj.twoNR = roundStrClean.split("- ")
 
-                for (var z = 0; z < obj.twoNR.length - 1; z++) { // this maybe (prob) is buggy
+                for (var z = 0; z < obj.twoNR.length; z++) { // this maybe (prob) is buggy
                     // var lenUpdate = 0
                     // while (true) {
                     if (obj.twoNR[z].includes("and")) {
                         var tempBreakStorage = obj.twoNR[z]
                         obj.twoNR[z] = tempBreakStorage.substring(0, tempBreakStorage.indexOf("and"))
-                        obj.twoNR.splice(z + 1, 0, tempBreakStorage.substring(tempBreakStorage.indexOf("and") + 3))
+                        obj.twoNR.push(tempBreakStorage.substring(tempBreakStorage.indexOf("and") + 3))
                         // z++;
                     }
                     // }
@@ -229,7 +245,15 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
                         multiArgSameLineTempArr.push(multiArgSameLineTempContent)
                     }
                     obj.twoNR = multiArgSameLineTempArr;
-                } else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && roundStrClean.includes("2NR")) { // same line 1 arg
+                } else if (!roundStrClean.includes(',') && !roundStrClean.includes('and') && (((roundStrClean.match(/da/g) || []).length > 0) || ((roundStrClean.match(/cp/g) || []).length > 0)) && (roundStrClean.indexOf('cp') + 2 != roundStrClean.length)) { // has a cp before a bunch of other arguments that are not labled da or cp. Just splitting the cp and dumping the rest in a seperate element. 
+                    var multiArgSameLineTempArr = []
+                    multiArgSameLineTempArr.push(roundStrClean.substring(0, roundStrClean.indexOf('cp') + 2))
+                    roundStrClean = roundStrClean.replace(roundStrClean.substring(0, roundStrClean.indexOf('cp') + 2), "")
+                    roundStrClean = roundStrClean.trim()
+                    multiArgSameLineTempArr.push(roundStrClean)
+                    obj.twoNR = multiArgSameLineTempArr;
+                }
+                else if (!roundStrClean.includes(",") && !roundStrClean.includes("and") && roundStrClean.includes("2NR")) { // same line 1 arg
                     obj.twoNR = roundStrClean.substring(roundStrClean.indexOf("2NR") + 3).split()
                 } else {
                     obj.twoNR = [roundStrClean]
@@ -250,6 +274,7 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
                 obj.twoNR.splice(0, 1)
             }
 
+            // 
         }
 
         rounds.push(obj)
@@ -272,6 +297,66 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
         }
     }
 
+    // seperate "case" from off case args
+    for (var i = 0; i < rounds.length; i++) {
+        for (j = 0; j < rounds[i].twoNR.length; j++) {
+            if (rounds[i].twoNR[j].includes("case") && rounds[i].twoNR[j] != "case") {
+                rounds[i].twoNR[j] = rounds[i].twoNR[j].replace("case", "")
+                rounds[i].twoNR[j] = rounds[i].twoNR[j].trim()
+                rounds[i].twoNR.push("case")
+            }
+        }
+    }
+
+    // Attempt to seperate arguments that are seperated with spaces once more
+    for (var i = 0; i < rounds.length; i++) {
+        for (j = 0; j < rounds[i].twoNR.length; j++) {
+            var finalCleanStr = rounds[i].twoNR[j]
+            finalCleanStr = finalCleanStr.toLowerCase()
+            if (!finalCleanStr.includes(",") && !finalCleanStr.includes("and") && finalCleanStr.includes("cp") && finalCleanStr.includes("da")) {  // multiple args on one line, no seperator.
+                var multiArgSameLineTempArr = []
+                while (finalCleanStr.includes("cp") || finalCleanStr.includes("da")) {
+                    var multiArgSameLineTempContent = ""
+                    if (finalCleanStr.indexOf("cp") < finalCleanStr.indexOf("da") && finalCleanStr.includes('cp') && finalCleanStr.includes('da')) { // there is a cp before a da
+                        multiArgSameLineTempContent = finalCleanStr.substring(0, finalCleanStr.indexOf("cp") + 2)
+                        finalCleanStr = finalCleanStr.replace(multiArgSameLineTempContent, "")
+                        finalCleanStr = finalCleanStr.trim()
+                        multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                    } else if (finalCleanStr.indexOf("da") < finalCleanStr.indexOf("cp") && finalCleanStr.includes('cp') && finalCleanStr.includes('da')) { // there is a da before a cp
+                        multiArgSameLineTempContent = finalCleanStr.substring(0, finalCleanStr.indexOf("da") + 2)
+                        finalCleanStr = finalCleanStr.replace(multiArgSameLineTempContent, "")
+                        finalCleanStr = finalCleanStr.trim()
+                        multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                    } else { // only 1 arg  left
+                        finalCleanStr = finalCleanStr.trim()
+                        multiArgSameLineTempArr.push(finalCleanStr)
+                        finalCleanStr = finalCleanStr.replace(finalCleanStr, "")
+                    }
+                }
+                rounds[i].twoNR = multiArgSameLineTempArr;
+            } else if (!finalCleanStr.includes(",") && !finalCleanStr.includes("and") && (finalCleanStr.match(/cp/g) || []).length > 1) { // more than one cp but no das
+                var multiArgSameLineTempArr = []
+                while (finalCleanStr.includes('cp')) {
+                    var multiArgSameLineTempContent = ""
+                    multiArgSameLineTempContent = finalCleanStr.substring(0, finalCleanStr.indexOf('cp') + 2)
+                    finalCleanStr = finalCleanStr.replace(multiArgSameLineTempContent, "")
+                    finalCleanStr = finalCleanStr.trim()
+                    multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                }
+                rounds[i].twoNR = multiArgSameLineTempArr;
+            } else if (!finalCleanStr.includes(",") && !finalCleanStr.includes("and") && (finalCleanStr.match(/da/g) || []).length > 1) { // more than one da but no cps
+                var multiArgSameLineTempArr = []
+                while (finalCleanStr.includes('da')) {
+                    var multiArgSameLineTempContent = ""
+                    multiArgSameLineTempContent = finalCleanStr.substring(0, finalCleanStr.indexOf('da') + 2)
+                    finalCleanStr = finalCleanStr.replace(multiArgSameLineTempContent, "")
+                    finalCleanStr = finalCleanStr.trim()
+                    multiArgSameLineTempArr.push(multiArgSameLineTempContent)
+                }
+                rounds[i].twoNR = multiArgSameLineTempArr;
+            }
+        }
+    }
     // move all args into 1 array
     for (var i = 0; i < rounds.length; i++) {
         for (j = 0; j < rounds[i].twoNR.length; j++) {
@@ -313,6 +398,10 @@ request(`https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg`, (e
     }
     if (occurenceNum.length === 0 || occurenceNum === undefined) {
         console.log(`Round reports empty.`)
+        console.log($("#tblReports tr").length)
+        if ($("#tblReports tr").length === 2) {
+            console.log(`Only has 1 round. Their entry might not be uniformed. Check their round report here: ${link}`)
+        }
     }
 })
 

@@ -7,7 +7,7 @@
 
         {
             "name": "Launch Program",
-            "program": "${workspaceFolder}/OLDindex.js",
+            "program": "${workspaceFolder}/2nrFrequencySearch.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
