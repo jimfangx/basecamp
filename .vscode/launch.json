@@ -5,9 +5,10 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Launch Program",
-            "program": "${workspaceFolder}/2nrFrequencySearch.js",
+            "program": "${workspaceFolder}/judgeAnalysis.js",
             "request": "launch",
             "skipFiles": [
                 "<node_internals>/**"
