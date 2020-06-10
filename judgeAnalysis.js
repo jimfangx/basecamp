@@ -2,6 +2,8 @@ const superagent = require('superagent');
 const { det } = require("detergent");
 const stripHtml = require("string-strip-html");
 const fs = require('fs')
+const cheerio = require('cheerio')
+const moment = require('moment')
 const spreadingSearchdb = require("./spreadingSearchdb.json")
 const flowingSearchdb = require("./flowingSearchdb.json")
 const truthTechSearchdb = require("./truthTechSearchdb.json")
@@ -42,9 +44,13 @@ var replaceHtmlEntites = (function () {
 // var personID = 1
 // while (personID < 150) { // 234331
 superagent
-    .get(`https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=153283`)
+    .get(`https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=5996`)
     .end((err, res) => {
+        const $ = cheerio.load(res.text) // load judged past rounds table
+        // console.log(res.text.substring(res.text.indexOf(`<table id="record`)))
         var paradigm = res.text.substring(res.text.indexOf(`<div class="paradigm">`) + `<div class="paradigm">`.length, getPosition(res.text, '</div>', 6))
+        
+        var judge = res.text.substring(res.text.indexOf(`<span class="twothirds">`))
         var clean;
         clean = det(paradigm), {
             fixBrokenEntities: true,
@@ -188,6 +194,51 @@ superagent
         } else if (clean.includes(`flow`) && clean.length > 500) {
             console.log(`Flow judge`)
         }
+
+        // email chain address
+        try {
+        console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
+        } catch(err) {
+            console.log(`No email address :(`)
+        }
+        
+        // aff neg decision ratio
+        var affDecisionsTotal = 0
+        var negDecisionsTotal = 0
+        var affDecisionsYear = 0
+        var negDecisionsYear = 0
+
+
+        for (i = 0; i < $("#record tr").length; i++) {
+            var roundTimestamp = $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().substring(0, $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().indexOf("\n"))
+
+            // console.log((Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000)
+
+            var ev = $("#record tr").eq(i).find('td').eq(2).text().toLowerCase().trim()
+            if (ev.includes(`cx`) || ev.includes(`pol`) || ev.includes(`policy`)) {
+                ev = true
+            } else {
+                ev = false
+            }
+
+            if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
+                affDecisionsTotal++
+                affDecisionsYear++
+            } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
+                negDecisionsTotal++
+                negDecisionsYear++
+            } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && ev) {
+                affDecisionsTotal++
+            } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && ev) {
+                negDecisionsTotal++
+            }
+        }
+        console.log(`Total policy rounds: ${affDecisionsTotal + negDecisionsTotal}`)
+        console.log(`Aff total decision rate: ${(affDecisionsTotal / (affDecisionsTotal+negDecisionsTotal) * 100)}%`)
+        console.log(`Neg total decision ratio: ${(negDecisionsTotal / (affDecisionsTotal+negDecisionsTotal) * 100)}%`)
+        console.log(`Aff last year decision ratio: ${(affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+        console.log(`Neg last year decision ratio: ${(negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+
     });
     // personID++;
 // }
