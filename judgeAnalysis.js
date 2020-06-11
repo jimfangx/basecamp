@@ -4,14 +4,17 @@ const stripHtml = require("string-strip-html");
 const fs = require('fs')
 const cheerio = require('cheerio')
 const moment = require('moment')
-const spreadingSearchdb = require("./spreadingSearchdb.json")
-const flowingSearchdb = require("./flowingSearchdb.json")
-const truthTechSearchdb = require("./truthTechSearchdb.json")
-const techTruthSearchdb = require('./techTruthSearchdb.json')
-const techistruthdb = require("./techistruthdb.json")
-
-const noFlowing = require("./noFlowing.json")
-const noSpread = require("./noSpread.json");
+const spreadingSearchdb = require("./judgeAnalysisSearchFiles/spreadingSearchdb.json")
+const flowingSearchdb = require("./judgeAnalysisSearchFiles/flowingSearchdb.json")
+const truthTechSearchdb = require("./judgeAnalysisSearchFiles/truthTechSearchdb.json")
+const techTruthSearchdb = require('./judgeAnalysisSearchFiles/techTruthSearchdb.json')
+const techistruthdb = require("./judgeAnalysisSearchFiles/techistruthdb.json")
+const noFlowing = require("./judgeAnalysisSearchFiles/noFlowing.json")
+const noSpread = require("./judgeAnalysisSearchFiles/noSpread.json");
+const noHandshakes = require("./judgeAnalysisSearchFiles/noHandshakes.json")
+const pronouns = require("./judgeAnalysisSearchFiles/genderPronouns.json")
+const noTagCX = require('./judgeAnalysisSearchFiles/noTagTeam.json')
+// http://prntscr.com/sxmvag
 function getPosition(string, subString, index) {
     return string.split(subString, index).join(subString).length;
 }
@@ -44,12 +47,12 @@ var replaceHtmlEntites = (function () {
 // var personID = 1
 // while (personID < 150) { // 234331
 superagent
-    .get(`https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=5996`)
+    .get(`https://www.tabroom.com/index/paradigm.mhtml?search_first=Rahim&search_last=Malik`)
     .end((err, res) => {
         const $ = cheerio.load(res.text) // load judged past rounds table
         // console.log(res.text.substring(res.text.indexOf(`<table id="record`)))
         var paradigm = res.text.substring(res.text.indexOf(`<div class="paradigm">`) + `<div class="paradigm">`.length, getPosition(res.text, '</div>', 6))
-        
+
         var judge = res.text.substring(res.text.indexOf(`<span class="twothirds">`))
         var clean;
         clean = det(paradigm), {
@@ -83,7 +86,7 @@ superagent
         // }
 
         // check for specific words etc
-        console.log(clean.length)
+        // console.log(clean.length)
         clean = clean.toLowerCase();
 
         // check for flowing requirements
@@ -123,7 +126,7 @@ superagent
         var spreading = false
         for (i = 0; i < spreadingSearchdb.length; i++) {
             if (clean.includes(spreadingSearchdb[i])) {
-                console.log(`:check: Allows spareding`)
+                console.log(`:check: Allows spreading`)
                 spreading = true;
                 break;
             }
@@ -186,22 +189,21 @@ superagent
             }
         }
 
-        // Lay / Flow final verdict
-        if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && !flowing) {
-            console.log(`Lay judge`)
-        } else if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && flowing && !clean.includes(`i hate lay`)) {
-            console.log(`Flay judge`)
-        } else if (clean.includes(`flow`) && clean.length > 500) {
-            console.log(`Flow judge`)
-        }
-
         // email chain address
         try {
-        console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
-        } catch(err) {
+            if (clean.includes(`[at]`)) {
+                console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
+            } else if (clean.includes(`[dot]`)) {
+                console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
+            } else if (clean.includes(`dot`) && clean.includes(`[at]`)) {
+                console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
+            } else {
+                console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
+            }
+        } catch (err) {
             console.log(`No email address :(`)
         }
-        
+
         // aff neg decision ratio
         var affDecisionsTotal = 0
         var negDecisionsTotal = 0
@@ -234,11 +236,57 @@ superagent
             }
         }
         console.log(`Total policy rounds: ${affDecisionsTotal + negDecisionsTotal}`)
-        console.log(`Aff total decision rate: ${(affDecisionsTotal / (affDecisionsTotal+negDecisionsTotal) * 100)}%`)
-        console.log(`Neg total decision ratio: ${(negDecisionsTotal / (affDecisionsTotal+negDecisionsTotal) * 100)}%`)
-        console.log(`Aff last year decision ratio: ${(affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
-        console.log(`Neg last year decision ratio: ${(negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+        if (affDecisionsTotal === 0 && negDecisionsTotal === 0) {
+            console.log(`No rounds judged`)
+        } else {
+            console.log(`Aff total decision rate: ${(affDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
+            console.log(`Neg total decision ratio: ${(negDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
+        }
+        if (affDecisionsYear === 0 && negDecisionsYear === 0) {
+            console.log(`No rounds judged within last year`)
+        } else {
+            console.log(`Aff last year decision ratio: ${(affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+            console.log(`Neg last year decision ratio: ${(negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+        }
 
+        // handshaking ok?
+        var handshake = true
+        for (i = 0; i < noHandshakes.length; i++) {
+            if (clean.includes(noHandshakes[i])) {
+                handshake = false
+                break
+            }
+        }
+        console.log(`Handshakes (Defaults to Yes if not specified): ${handshake ? "Yes" : "No"}`)
+
+        // pronouns - Pronoun list source: https://www1.nyc.gov/assets/hra/downloads/pdf/services/lgbtqi/Gender%20Pronouns%20final%20draft%2010.23.17.pdf
+        var pronounFinal = "Not specified"
+        for (i = 0; i < pronouns.length; i++) {
+            if (clean.includes(pronouns[i])) {
+                pronounFinal = pronouns[i]
+                break
+            }
+        }
+        console.log(`Pronouns: ${pronounFinal}`)
+
+        // tag team
+        var tagTeamOK = true;
+        for (i = 0; i < noTagCX.length; i++) {
+            if (clean.includes(noTagCX[i])) {
+                tagTeamOK = false;
+                break
+            }
+        }
+        console.log(`Tag Team CX (Defaults to Yes if not specified): ${tagTeamOK ? "Yes" : "No"}`)
+
+        // Lay / Flow final verdict
+        if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && !flowing) {
+            console.log(`Ultimate Rating: Lay judge`)
+        } else if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && flowing && !clean.includes(`i hate lay`)) {
+            console.log(`Ultimate Rating: Flay judge`)
+        } else if (clean.includes(`flow`) && clean.length > 500) {
+            console.log(`Ultimate Rating: Flow judge`)
+        }
     });
     // personID++;
 // }
