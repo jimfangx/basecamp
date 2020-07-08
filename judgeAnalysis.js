@@ -46,8 +46,10 @@ var replaceHtmlEntites = (function () {
 
 // var personID = 1
 // while (personID < 150) { // 234331
+
+// IMPUT Requires paradigm link
 superagent
-    .get(`https://www.tabroom.com/index/paradigm.mhtml?search_first=Rahim&search_last=Malik`)
+    .get(`https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`)
     .end((err, res) => {
         const $ = cheerio.load(res.text) // load judged past rounds table
         // console.log(res.text.substring(res.text.indexOf(`<table id="record`)))
@@ -86,7 +88,7 @@ superagent
         // }
 
         // check for specific words etc
-        // console.log(clean.length)
+        console.log(clean.length)
         clean = clean.toLowerCase();
 
         // check for flowing requirements
