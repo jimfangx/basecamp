@@ -44,6 +44,10 @@ ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', (event, data) => {
     // no api ugh. :( web scraping ensues with https://learnscraping.com/nodejs-web-scraping-with-puppeteer/
 })
 
+function getUpcomingTournamentData() {
+    
+}
+
 
 
 // Quit when all windows are closed, except on macOS. There, it's common
