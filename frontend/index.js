@@ -2,6 +2,7 @@ const electron = require('electron')
 const { app, BrowserWindow, ipcMain, Menu, ClientRequest, session, powerSaveBlocker, globalShortcut } = electron;
 let mainWindow;
 let authWindow;
+const puppeteer = require('puppeteer');
 
 
 app.whenReady().then(() => {
@@ -41,11 +42,16 @@ ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', (event, data) => {
     console.log("received!")
     console.log(data)
     authWindow.close()
+    getUpcomingTournamentData()
     // no api ugh. :( web scraping ensues with https://learnscraping.com/nodejs-web-scraping-with-puppeteer/
 })
 
-function getUpcomingTournamentData() {
-    
+async function getUpcomingTournamentData() {
+    const browser = await puppeteer.launch({ headless: false, defaultViewport: null})
+    const page = await browser.newPage();
+    await page.goto(`https://www.tabroom.com/index/index.mhtml`)
+    await page.waitFor(500);
+    await page.click(`#toprow > span.login > a`)
 }
 
 
