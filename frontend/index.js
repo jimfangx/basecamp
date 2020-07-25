@@ -59,6 +59,13 @@ async function getUpcomingTournamentData(data) {
     await page.type(`#password`, data[1])
     await page.waitFor(200);
     await page.click(`#login-box > form > fieldset > input`)
+    var returnData = await page.evaluate(() => {
+        var evaluateCombinationData = []
+        evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText)
+        return evaluateCombinationData;
+    })
+    // returnData.push(await page.evaluate(page.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText))
+    await console.log(returnData)
     //return name, recent competition data if needed
 }
 
