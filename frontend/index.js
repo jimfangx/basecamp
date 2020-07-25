@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain, Menu, ClientRequest, session, powerSaveBloc
 let mainWindow;
 let authWindow;
 const puppeteer = require('puppeteer');
+const fs = require('fs')
 
 
 app.whenReady().then(() => {
@@ -40,18 +41,25 @@ ipcMain.on('tabLinkWindowOpenReqMainjsIndexjs', (event) => { //tab link window o
 
 ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', (event, data) => {
     console.log("received!")
-    console.log(data)
+    // console.log(data)
+    fs.writeFileSync('./tabCred.json', data);
     authWindow.close()
-    getUpcomingTournamentData()
+    getUpcomingTournamentData(data)
     // no api ugh. :( web scraping ensues with https://learnscraping.com/nodejs-web-scraping-with-puppeteer/
 })
 
-async function getUpcomingTournamentData() {
+async function getUpcomingTournamentData(data) {
     const browser = await puppeteer.launch({ headless: false, defaultViewport: null})
     const page = await browser.newPage();
     await page.goto(`https://www.tabroom.com/index/index.mhtml`)
     await page.waitFor(500);
     await page.click(`#toprow > span.login > a`)
+    await page.type(`#user\\a \\9 \\9 \\9 \\9 \\9 name`, data[0])
+    await page.waitFor(200);
+    await page.type(`#password`, data[1])
+    await page.waitFor(200);
+    await page.click(`#login-box > form > fieldset > input`)
+    //return name, recent competition data if needed
 }
 
 
