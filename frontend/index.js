@@ -49,9 +49,10 @@ ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', (event, data) => {
 })
 
 async function getUpcomingTournamentData(data) {
-    const browser = await puppeteer.launch({ headless: false, defaultViewport: null})
+    const browser = await puppeteer.launch({ headless: false, defaultViewport: null })
     const page = await browser.newPage();
     await page.goto(`https://www.tabroom.com/index/index.mhtml`)
+    // await page.addScriptTag({ url: 'https://code.jquery.com/jquery-3.2.1.min.js' })
     await page.waitFor(500);
     await page.click(`#toprow > span.login > a`)
     await page.type(`#user\\a \\9 \\9 \\9 \\9 \\9 name`, data[0])
@@ -62,6 +63,15 @@ async function getUpcomingTournamentData(data) {
     var returnData = await page.evaluate(() => {
         var evaluateCombinationData = []
         evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText)
+        try {
+            evaluateCombinationData.push(document.querySelector("div.nowrap:nth-child(1)").innerText)
+        } catch (err) {
+            console.log(err)
+            evaluateCombinationData.push(`noUpcoming`)
+        }
+        if (evaluateCombinationData[1] != `noUpcoming`) {//there is a scheduled tourn, get date & status
+            evalua
+        }
         return evaluateCombinationData;
     })
     // returnData.push(await page.evaluate(page.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText))
