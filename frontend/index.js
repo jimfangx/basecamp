@@ -62,15 +62,47 @@ async function getUpcomingTournamentData(data) {
     await page.click(`#login-box > form > fieldset > input`)
     var returnData = await page.evaluate(() => {
         var evaluateCombinationData = []
-        evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText)
+        evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText) //  name
+        // upcoming
+        var upcomingTournObj = {
+            name: "",
+            date: "",
+            event: "",
+            status: ""
+        }
         try {
-            evaluateCombinationData.push(document.querySelector("div.nowrap:nth-child(1)").innerText)
+            upcomingTournObj.name = document.querySelector("div.nowrap:nth-child(1)").innerText
+            // evaluateCombinationData.push(document.querySelector("div.nowrap:nth-child(1)").innerText)
         } catch (err) {
             console.log(err)
-            evaluateCombinationData.push(`noUpcoming`)
+            upcomingTournObj.name = 'noUpcomingTournamentsBasecamp'
+            evaluateCombinationData.push(upcomingTournObj)
+            // evaluateCombinationData.push(`noUpcoming`)
         }
-        if (evaluateCombinationData[1] != `noUpcoming`) {//there is a scheduled tourn, get date & status
-            evalua
+        if (evaluateCombinationData[1].name != `noUpcomingTournamentsBasecamp`) {//there is a scheduled tourn, get date & status
+            upcomingTournObj.date = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(2)").innerText
+            upcomingTournObj.event = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(3)").innerText
+            upcomingTournObj.status = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(5)").innerText
+            evaluateCombinationData.push(upcomingTournObj)
+        }
+
+        // current - if has current dont show the upcoming. check info box for links, if found, find a way to beam to phone
+        var currentTournObj = {
+            name: "",
+            round: "",
+            date: "",
+            event: "",
+            status: ""
+        }
+        try {
+            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText
+        } catch (err) {
+            console.log(err)
+            currentTournObj.name = 'noCurrentTournamentsBasecamp'
+            evaluateCombinationData.push(currentTournObj)
+        } 
+        if (evaluateCombinationData[2].name != 'noCurrentTournamentsBasecamp') {
+            upcomingTournObj.round = 
         }
         return evaluateCombinationData;
     })
