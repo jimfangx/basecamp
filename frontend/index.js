@@ -60,18 +60,25 @@ async function getUpcomingTournamentData(data) {
     await page.type(`#password`, data[1])
     await page.waitFor(200);
     await page.click(`#login-box > form > fieldset > input`)
+    await page.waitFor(200)
     var returnData = await page.evaluate(() => {
         var evaluateCombinationData = []
         evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText) //  name
         // upcoming
+        debugger
         var upcomingTournObj = {
             name: "",
             date: "",
             event: "",
             status: ""
         }
+        console.log()
         try {
-            upcomingTournObj.name = document.querySelector("div.nowrap:nth-child(1)").innerText
+            upcomingTournObj.name = document.querySelector("div.nowrap:nth-child(1)").innerText.trim()
+            upcomingTournObj.date = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(2)").innerText.trim()
+            upcomingTournObj.event = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(3)").innerText.trim()
+            upcomingTournObj.status = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(5)").innerText.trim()
+            evaluateCombinationData.push(upcomingTournObj)
             // evaluateCombinationData.push(document.querySelector("div.nowrap:nth-child(1)").innerText)
         } catch (err) {
             console.log(err)
@@ -79,34 +86,39 @@ async function getUpcomingTournamentData(data) {
             evaluateCombinationData.push(upcomingTournObj)
             // evaluateCombinationData.push(`noUpcoming`)
         }
-        if (evaluateCombinationData[1].name != `noUpcomingTournamentsBasecamp`) {//there is a scheduled tourn, get date & status
-            upcomingTournObj.date = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(2)").innerText
-            upcomingTournObj.event = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(3)").innerText
-            upcomingTournObj.status = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(5)").innerText
-            evaluateCombinationData.push(upcomingTournObj)
-        }
+        //there is a scheduled tourn, get date & status
+
 
         // current - if has current dont show the upcoming. check info box for links, if found, find a way to beam to phone
         var currentTournObj = {
             name: "",
             round: "",
-            date: "",
-            event: "",
-            status: ""
+            start: "",
+            room: "",
+            side: "",
+            oppoent: "",
+            judge: ""
         }
         try {
-            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText
+            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText.trim()
+            currentTournObj.round = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(1)").innerText.trim()
+            currentTournObj.start = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(2)").innerText.trim()
+            currentTournObj.room = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(3)").innerText.trim()
+            currentTournObj.side = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(4)").innerText.trim()
+            currentTournObj.oppoent = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(5)").innerText.trim()
+            currentTournObj.judge = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(6)").innerText.trim()
+            evaluateCombinationData.push(currentTournObj)
         } catch (err) {
             console.log(err)
             currentTournObj.name = 'noCurrentTournamentsBasecamp'
             evaluateCombinationData.push(currentTournObj)
-        } 
-        if (evaluateCombinationData[2].name != 'noCurrentTournamentsBasecamp') {
-            upcomingTournObj.round = 
         }
+
         return evaluateCombinationData;
     })
+    // navigate win loss tournament lis document.querySelector("#content > div.main > div.results.screens > table > tbody > tr:nth-child(2)")
     // returnData.push(await page.evaluate(page.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText))
+    // await 
     await console.log(returnData)
     //return name, recent competition data if needed
 }
