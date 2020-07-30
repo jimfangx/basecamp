@@ -60,12 +60,14 @@ async function getUpcomingTournamentData(data) {
     await page.type(`#password`, data[1])
     await page.waitFor(200);
     await page.click(`#login-box > form > fieldset > input`)
-    await page.waitFor(200)
+    await page.waitFor(500) // original 200, need to test for tolerance 
+    debugger
     var returnData = await page.evaluate(() => {
+        // debugger
         var evaluateCombinationData = []
         evaluateCombinationData.push(document.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText) //  name
-        // upcoming
-        debugger
+        // future
+        // debugger
         var upcomingTournObj = {
             name: "",
             date: "",
@@ -74,10 +76,11 @@ async function getUpcomingTournamentData(data) {
         }
         console.log()
         try {
-            upcomingTournObj.name = document.querySelector("div.nowrap:nth-child(1)").innerText.trim()
-            upcomingTournObj.date = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(2)").innerText.trim()
-            upcomingTournObj.event = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(3)").innerText.trim()
-            upcomingTournObj.status = document.querySelector("#upcoming > tbody > tr:nth-child(1) > td:nth-child(5)").innerText.trim()
+            var mostRecentFuture = document.querySelector("#upcoming > tbody").rows.length
+            upcomingTournObj.name = document.querySelector(`#upcoming > tbody > tr:nth-child(${mostRecentFuture}) > td:nth-child(1) > div`).innerText.trim()
+            upcomingTournObj.date = document.querySelector(`#upcoming > tbody > tr:nth-child(${mostRecentFuture}) > td:nth-child(2)`).innerText.trim()
+            upcomingTournObj.event = document.querySelector(`#upcoming > tbody > tr:nth-child(${mostRecentFuture}) > td:nth-child(3)`).innerText.trim()
+            upcomingTournObj.status = document.querySelector(`#upcoming > tbody > tr:nth-child(${mostRecentFuture}) > td:nth-child(5)`).innerText.trim()
             evaluateCombinationData.push(upcomingTournObj)
             // evaluateCombinationData.push(document.querySelector("div.nowrap:nth-child(1)").innerText)
         } catch (err) {
@@ -97,16 +100,23 @@ async function getUpcomingTournamentData(data) {
             room: "",
             side: "",
             oppoent: "",
-            judge: ""
+            judge: "",
+            paradigmLink: ""
         }
         try {
-            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText.trim()
-            currentTournObj.round = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(1)").innerText.trim()
-            currentTournObj.start = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(2)").innerText.trim()
-            currentTournObj.room = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(3)").innerText.trim()
-            currentTournObj.side = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(4)").innerText.trim()
-            currentTournObj.oppoent = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(5)").innerText.trim()
-            currentTournObj.judge = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr > td:nth-child(6)").innerText.trim()
+            var mostRecentCurrent = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody").rows.length
+
+            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText.trim()  // this may break if people are entered in 2 tournaments at once - will only show thee top most one
+            currentTournObj.round = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(1)`).innerText.trim()
+            currentTournObj.start = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(2)`).innerText.trim()
+            currentTournObj.room = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(3)`).innerText.trim()
+            if (currentTournObj.room === "") {
+                currentTournObj.room = "onlineJitsi"
+            }
+            currentTournObj.side = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(4)`).innerText.trim()
+            currentTournObj.oppoent = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(5)`).innerText.trim()
+            currentTournObj.judge = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(6) > div > span`).innerText.substring(1).trim()
+            currentTournObj.paradigmLink = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(3) > td:nth-child(6) > div > span > span > a`).href
             evaluateCombinationData.push(currentTournObj)
         } catch (err) {
             console.log(err)
@@ -114,13 +124,126 @@ async function getUpcomingTournamentData(data) {
             evaluateCombinationData.push(currentTournObj)
         }
 
+        // return results table length for k/d calc:
+        var resultsTableLength = [];
+        if ((document.querySelector("#content > div.main > div.results.screens").getElementsByTagName('table').length) > 2) {
+            for (z = 1; z <= document.querySelector("#content > div.main > div.results.screens").getElementsByTagName('table').length - 2; z++) {
+                console.log(z)
+                resultsTableLength.push(document.querySelector(`#content > div.main > div.results.screens > .hasStickyHeaders:nth-of-type(${z})`).rows.length - 1) // # of tournaments given different histories
+            }
+        } else {
+            try {
+                resultsTableLength.push(document.querySelector("#content > div.main > div.results.screens > table > tbody").rows.length) // number of tournaments given 1 history
+            } catch (err) {
+                resultsTableLength.push(0)
+                console.log(err)
+            }
+        }
+        evaluateCombinationData.push(resultsTableLength)
         return evaluateCombinationData;
     })
     // navigate win loss tournament lis document.querySelector("#content > div.main > div.results.screens > table > tbody > tr:nth-child(2)")
     // returnData.push(await page.evaluate(page.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText))
-    // await 
     await console.log(returnData)
-    //return name, recent competition data if needed
+    await page.waitFor(200)
+    await console.log(returnData[returnData.length-1])
+    //conpetition gathering
+    var winNumberIncludesBye
+    var loseNumber
+    // debugger
+    if (returnData[returnData.length-1].length > 1) { //multiple schools / histories at different places
+        for (i = 0; i < returnData[returnData.length-1].length; i++) { // for each history block
+            for (j = 1; j < returnData[returnData.length-1][i]; j++) { // for each tournament
+                await page.click(`#results`) // have to click results to make page visible
+                await page.waitFor(200)
+                await page.click(`#content > div.main > div.results.screens > table > tbody > tr:nth-child(${j}) > td:nth-child(5) > a`) //click on the blue botton
+                await page.waitFor(200)
+
+                winNumberIncludesBye += await page.evaluate(() => {
+                    var returnNumber = 0;
+                    try {
+                        for (z = 0; z < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
+                            if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div`).innerText.trim() === "BYE") { // its a win, add 1 to the return number
+                                returnNumber++;
+                            } else if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText.trim() === "W") {
+                                returnNumber++;
+                            }
+                        }
+                    } catch (err) {
+                        console.log(err)
+                        //no pts added to the returnNumber variable
+                    }
+                    return returnNumber;
+                })
+
+                loseNumber += await page.evaluate(() => {
+                    var returnNumber = 0;
+                    try {
+                        for (z = 0; z < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
+                            if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText === "L") {
+                                returnNumber++;
+                            }
+                        }
+                    } catch (err) {
+                        console.log(err)
+                        //no pts added to the returnNumber variable
+                    }
+                    return returnNumber;
+                })
+
+                await page.close()
+                await page.waitFor(200)
+
+            }
+        }
+    } else { // competitive history only at 1 place
+        for (i = 1; i < returnData[returnData.length-1][0]; i++) { // cycle through # of tournaments
+            await page.click(`#results`) // have to click results to make page visible
+            await page.waitFor(200)
+            await page.click(`#content > div.main > div.results.screens > table > tbody > tr:nth-child(${i}) > td:nth-child(5) > a`) //click on the blue botton
+            await page.waitFor(200)
+
+            winNumberIncludesBye += await page.evaluate(() => {
+                var returnNumber = 0;
+                try {
+                    for (j = 0; j < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
+                        ; i++) {
+                        if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${j}) > td:nth-child(6) > div`).innerText.trim() === "BYE") { // its a win, add 1 to the return number
+                            returnNumber++;
+                        } else if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${j}) > td:nth-child(6) > div > span > .semibold`).innerText.trim() === "W") {
+                            returnNumber++;
+                        }
+                    }
+                } catch (err) {
+                    console.log(err)
+                    // no pts added to the return number variable
+                }
+                return returnNumber;
+            })
+
+
+            loseNumber += await page.evaluate(() => {
+                var returnNumber = 0;
+                try {
+                    for (j = 0; j < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
+                        ; i++) {
+                        if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${j}) > td:nth-child(6) > div > span > .semibold`).innerText === "L") {
+                            returnNumber++;
+                        }
+                    }
+                } catch (err) {
+                    console.log(err)
+                }
+                return returnNumber;
+            })
+
+            await page.close()
+            await page.waitFor(200)
+
+        }
+    }
+    await console.log(`WIN ${winNumberIncludesBye}`)
+    await console.log(`LOSE ${loseNumber}`)
 }
 
 
