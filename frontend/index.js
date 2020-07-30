@@ -61,7 +61,7 @@ async function getUpcomingTournamentData(data) {
     await page.waitFor(200);
     await page.click(`#login-box > form > fieldset > input`)
     await page.waitFor(500) // original 200, need to test for tolerance 
-    debugger
+    // debugger
     var returnData = await page.evaluate(() => {
         // debugger
         var evaluateCombinationData = []
@@ -146,67 +146,94 @@ async function getUpcomingTournamentData(data) {
     // returnData.push(await page.evaluate(page.querySelector("#content > div.main > span.threefifths.nospace > h3").innerText))
     await console.log(returnData)
     await page.waitFor(200)
-    await console.log(returnData[returnData.length-1])
+    await console.log(returnData[returnData.length - 1])
     //conpetition gathering
-    var winNumberIncludesBye
-    var loseNumber
+    var winNumberIncludesBye = 0;
+    var loseNumber = 0;
     // debugger
-    if (returnData[returnData.length-1].length > 1) { //multiple schools / histories at different places
-        for (i = 0; i < returnData[returnData.length-1].length; i++) { // for each history block
-            for (j = 1; j < returnData[returnData.length-1][i]; j++) { // for each tournament
+    if (returnData[returnData.length - 1].length > 1) { //multiple schools / histories at different places
+        for (i = 0; i < returnData[returnData.length - 1].length; i++) { // for each history block
+            await console.log("FIRST LOOP CONDOTION" + returnData[returnData.length - 1].length)
+            await console.log(`I: ${i}`)
+            for (j = 1; j <= returnData[returnData.length - 1][i]; j++) { // for each tournament
+                // await console.log("j" + j)
                 await page.click(`#results`) // have to click results to make page visible
                 await page.waitFor(200)
-                await page.click(`#content > div.main > div.results.screens > table > tbody > tr:nth-child(${j}) > td:nth-child(5) > a`) //click on the blue botton
-                await page.waitFor(200)
+                await page.click(`#content > div.main > div.results.screens > table:nth-of-type(${i + 1}) > tbody > tr:nth-child(${j}) > td:nth-child(5) > a`) //click on the blue botton for  each round in each history
+                // await page.waitFor(200)
+                const [newPage] = await Promise.all([
+                    new Promise(resolve => page.once('popup', resolve)),
+                    // page.click('a[target=_blank]'),
+                ]);
+                await newPage.waitFor(500)
 
-                winNumberIncludesBye += await page.evaluate(() => {
+                winNumberIncludesBye += await newPage.evaluate(() => {
                     var returnNumber = 0;
+
                     try {
-                        for (z = 0; z < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
-                            if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div`).innerText.trim() === "BYE") { // its a win, add 1 to the return number
-                                returnNumber++;
-                            } else if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText.trim() === "W") {
-                                returnNumber++;
+                        for (z = 1; z <= document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
+                            try {
+                                if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div`).innerText.trim() === "BYE") { // its a win, add 1 to the return number
+                                    returnNumber++;
+                                } else if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText.trim() === "W") {
+                                    returnNumber++;
+                                }
+                            }
+                            catch (err) {
+                                console.log(err)
+                                //no pts added to the returnNumber variable
                             }
                         }
                     } catch (err) {
                         console.log(err)
-                        //no pts added to the returnNumber variable
                     }
                     return returnNumber;
                 })
 
-                loseNumber += await page.evaluate(() => {
+                // await console.log("winNumberIncludesBye" + winNumberIncludesBye)
+
+                loseNumber += await newPage.evaluate(() => {
                     var returnNumber = 0;
+
                     try {
-                        for (z = 0; z < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
-                            if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText === "L") {
-                                returnNumber++;
+                        for (z = 1; z <= document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length; z++) { // get how many rounds for that tournament
+                            try {
+                                if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${z}) > td:nth-child(6) > div > span > .semibold`).innerText === "L") {
+                                    returnNumber++;
+                                }
+                            }
+                            catch (err) {
+                                console.log(err)
+                                //no pts added to the returnNumber variable
                             }
                         }
                     } catch (err) {
                         console.log(err)
-                        //no pts added to the returnNumber variable
                     }
                     return returnNumber;
                 })
 
-                await page.close()
+                await newPage.close()
                 await page.waitFor(200)
 
             }
         }
     } else { // competitive history only at 1 place
-        for (i = 1; i < returnData[returnData.length-1][0]; i++) { // cycle through # of tournaments
+        for (i = 1; i < returnData[returnData.length - 1][0]; i++) { // cycle through # of tournaments
             await page.click(`#results`) // have to click results to make page visible
             await page.waitFor(200)
             await page.click(`#content > div.main > div.results.screens > table > tbody > tr:nth-child(${i}) > td:nth-child(5) > a`) //click on the blue botton
-            await page.waitFor(200)
+            // await page.waitFor(200)
+            const [newPage] = await Promise.all([
+                new Promise(resolve => page.once('popup', resolve)),
+                page.click('a[target=_blank]'),
+            ]);
+            await newPage.waitFor(500)
 
-            winNumberIncludesBye += await page.evaluate(() => {
+            winNumberIncludesBye += await newPage.evaluate(() => {
                 var returnNumber = 0;
                 try {
-                    for (j = 0; j < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
+                    for (j = 1; j <= document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
                         ; i++) {
                         if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${j}) > td:nth-child(6) > div`).innerText.trim() === "BYE") { // its a win, add 1 to the return number
                             returnNumber++;
@@ -221,11 +248,12 @@ async function getUpcomingTournamentData(data) {
                 return returnNumber;
             })
 
+            // await console.log("winNumberIncludesBye" + winNumberIncludesBye)
 
-            loseNumber += await page.evaluate(() => {
+            loseNumber += await newPage.evaluate(() => {
                 var returnNumber = 0;
                 try {
-                    for (j = 0; j < document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
+                    for (j = 1; j <= document.querySelector("#content > div.main > div.full.nospace.martopmore > table > tbody").rows.length
                         ; i++) {
                         if (document.querySelector(`#content > div.main > div.full.nospace.martopmore > table > tbody > tr:nth-child(${j}) > td:nth-child(6) > div > span > .semibold`).innerText === "L") {
                             returnNumber++;
@@ -237,13 +265,15 @@ async function getUpcomingTournamentData(data) {
                 return returnNumber;
             })
 
-            await page.close()
+            await newPage.close()
             await page.waitFor(200)
 
         }
     }
     await console.log(`WIN ${winNumberIncludesBye}`)
     await console.log(`LOSE ${loseNumber}`)
+    returnData.push([winNumberIncludesBye, loseNumber]) // in the order of win rounds (+byes) & losses
+    await console.log(returnData) // need to return
 }
 
 
