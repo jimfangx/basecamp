@@ -39,12 +39,15 @@ ipcMain.on('tabLinkWindowOpenReqMainjsIndexjs', (event) => { //tab link window o
     authWindow.show()
 })
 
-ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', (event, data) => {
+ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', async (event, data) => {
     console.log("received!")
     // console.log(data)
     fs.writeFileSync('./tabCred.json', data);
     authWindow.close()
-    getUpcomingTournamentData(data)
+    var returnData = await getUpcomingTournamentData(data)
+    // await console.log("PRINTING: " + returnData)
+    await mainWindow.webContents.send('tabAuthDataReturnIndexjsMainjs', returnData)
+
     // no api ugh. :( web scraping ensues with https://learnscraping.com/nodejs-web-scraping-with-puppeteer/
 })
 
@@ -274,6 +277,9 @@ async function getUpcomingTournamentData(data) {
     await console.log(`LOSE ${loseNumber}`)
     returnData.push([winNumberIncludesBye, loseNumber]) // in the order of win rounds (+byes) & losses
     await console.log(returnData) // need to return
+    await browser.close();
+    return returnData;
+    // await mainWindow.webContents.send('tabAuthDataReturnIndexjsMainjs', returnData)
 }
 
 
