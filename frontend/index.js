@@ -77,7 +77,7 @@ async function getUpcomingTournamentData(data) {
             event: "",
             status: ""
         }
-        console.log()
+        // console.log()
         try {
             var mostRecentFuture = document.querySelector("#upcoming > tbody").rows.length
             upcomingTournObj.name = document.querySelector(`#upcoming > tbody > tr:nth-child(${mostRecentFuture}) > td:nth-child(1) > div`).innerText.trim()
@@ -114,17 +114,21 @@ async function getUpcomingTournamentData(data) {
             currentTournObj.start = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(2)`).innerText.trim()
             currentTournObj.room = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(3)`).innerText.trim()
             if (currentTournObj.room === "") {
-                currentTournObj.room = "onlineJitsi"
+                currentTournObj.room = "Online"
             }
             currentTournObj.side = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(4)`).innerText.trim()
             currentTournObj.oppoent = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(5)`).innerText.trim()
             currentTournObj.judge = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(6) > div > span`).innerText.substring(1).trim()
-            currentTournObj.paradigmLink = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(3) > td:nth-child(6) > div > span > span > a`).href
+            // OLD - currentTournObj.paradigmLink = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(3) > td:nth-child(6) > div > span > span > a`).href
+            currentTournObj.paradigmLink = document.querySelector("#content > div.main > div.screens.current > div.martopmore > table > tbody > tr:nth-child(2) > td:nth-child(6) > div > span > span > a").href
             evaluateCombinationData.push(currentTournObj)
         } catch (err) {
+            console.log(`ERORROEORRR: `)
             console.log(err)
-            currentTournObj.name = 'noCurrentTournamentsBasecamp'
-            evaluateCombinationData.push(currentTournObj)
+            if (err) {
+                currentTournObj.name = 'noCurrentTournamentsBasecamp'
+                evaluateCombinationData.push(currentTournObj)
+            }
         }
 
         // return results table length for k/d calc:
@@ -273,10 +277,11 @@ async function getUpcomingTournamentData(data) {
 
         }
     }
-    await console.log(`WIN ${winNumberIncludesBye}`)
-    await console.log(`LOSE ${loseNumber}`)
+    // await console.log(`WIN ${winNumberIncludesBye}`)
+    // await console.log(`LOSE ${loseNumber}`)
     returnData.push([winNumberIncludesBye, loseNumber]) // in the order of win rounds (+byes) & losses
     await console.log(returnData) // need to return
+    await page.waitFor(200)
     await browser.close();
     return returnData;
     // await mainWindow.webContents.send('tabAuthDataReturnIndexjsMainjs', returnData)
