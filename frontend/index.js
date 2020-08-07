@@ -3,7 +3,8 @@ const { app, BrowserWindow, ipcMain, Menu, ClientRequest, session, powerSaveBloc
 let mainWindow;
 let authWindow;
 const puppeteer = require('puppeteer');
-const fs = require('fs')
+const fs = require('fs');
+const { start } = require('repl');
 
 
 app.whenReady().then(() => {
@@ -51,8 +52,10 @@ ipcMain.on('tabroom.comCredentialstabLinkjsindexjs', async (event, data) => {
     // no api ugh. :( web scraping ensues with https://learnscraping.com/nodejs-web-scraping-with-puppeteer/
 })
 
+
+
 async function getUpcomingTournamentData(data) {
-    const browser = await puppeteer.launch({ headless: false, defaultViewport: null })
+    const browser = await puppeteer.launch({ headless: true, defaultViewport: null })
     const page = await browser.newPage();
     await page.goto(`https://www.tabroom.com/index/index.mhtml`)
     // await page.addScriptTag({ url: 'https://code.jquery.com/jquery-3.2.1.min.js' })
@@ -108,29 +111,79 @@ async function getUpcomingTournamentData(data) {
         }
         try {
             var mostRecentCurrent = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody").rows.length
+            for (var x = mostRecentCurrent; x > 0; x--) {
+                console.log("MOST RECET" + mostRecentCurrent)
+                console.log("X" + x)
+                currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText.trim()  // this may break if people are entered in 2 tournaments at once - will only show thee top most one
+                currentTournObj.round = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(1)`).innerText.trim()
+                currentTournObj.start = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(2)`).innerText.trim()
+                currentTournObj.room = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(3)`).innerText.trim()
+                if (currentTournObj.room === "") {
+                    currentTournObj.room = "Online"
+                }
+                currentTournObj.side = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(4)`).innerText.trim()
+                currentTournObj.oppoent = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(5)`).innerText.trim()
+                currentTournObj.judge = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${x}) > td:nth-child(6) > div > span`).innerText.substring(1).trim()
+                // OLD - currentTournObj.paradigmLink = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(3) > td:nth-child(6) > div > span > span > a`).href
+                currentTournObj.paradigmLink = document.querySelector("#content > div.main > div.screens.current > div.martopmore > table > tbody > tr:nth-child(2) > td:nth-child(6) > div > span > span > a").href
 
-            currentTournObj.name = document.querySelector("#content > div.main > div.screens.current > div.full.nospace.marbottommore.padtopmore.padbottom.ltborderbottom > span.threefifths.nospace > h5").innerText.trim()  // this may break if people are entered in 2 tournaments at once - will only show thee top most one
-            currentTournObj.round = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(1)`).innerText.trim()
-            currentTournObj.start = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(2)`).innerText.trim()
-            currentTournObj.room = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(3)`).innerText.trim()
-            if (currentTournObj.room === "") {
-                currentTournObj.room = "Online"
+                var startHours = currentTournObj.start.substring(currentTournObj.start.indexOf(currentTournObj.start.match(/\d/)), currentTournObj.start.indexOf('\n') - 3).trim()
+                // console.log(startHours)
+                // startHours = convertTime12to24(startHours)
+
+                const [time, modifier] = startHours.split(' ');
+
+                let [hours, minutes] = time.split(':');
+
+                if (hours === '12') {
+                    hours = '00';
+                }
+
+                if (modifier === 'PM') {
+                    hours = parseInt(hours, 10) + 12;
+                }
+                startHours = `${hours}:${minutes}`
+
+                console.log("START TIME" + startHours)
+                var currentTime = new Date().getHours() + ":" + new Date().getMinutes()
+                console.log("CURRENT TIME" + currentTime)
+                console.log(startHours.substring(0, startHours.indexOf(":")))
+                console.log(startHours.substring(startHours.indexOf(':')))
+                console.log(evaluateCombinationData)
+                if (startHours.substring(0, startHours.indexOf(":")) > new Date().getHours()) {
+                    // if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
+                        console.log("pushing! hour in front")
+                        evaluateCombinationData.push(currentTournObj)
+                        break;
+                    // }
+                } else if (startHours.substring(0, startHours.indexOf(":")) === new Date().getHours()) {
+                    if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
+                        console.log(`pushing! mins in front, same hour`)
+                        evaluateCombinationData.push(currentTournObj)
+                        break;
+                    }
+                }
+                // else {
+                //     mostRecentCurrent++;
+                // }
             }
-            currentTournObj.side = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(4)`).innerText.trim()
-            currentTournObj.oppoent = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(5)`).innerText.trim()
-            currentTournObj.judge = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(${mostRecentCurrent}) > td:nth-child(6) > div > span`).innerText.substring(1).trim()
-            // OLD - currentTournObj.paradigmLink = document.querySelector(`#content > div.main > div.screens.current > div.full.nospace.martopmore > table > tbody > tr:nth-child(3) > td:nth-child(6) > div > span > span > a`).href
-            currentTournObj.paradigmLink = document.querySelector("#content > div.main > div.screens.current > div.martopmore > table > tbody > tr:nth-child(2) > td:nth-child(6) > div > span > span > a").href
-            evaluateCombinationData.push(currentTournObj)
+            console.log("FINAL LENGTH" + evaluateCombinationData.length)
+            if (evaluateCombinationData.length < 3) {
+                currentTournObj.name = 'noCurrentTournamentsBasecamp'
+                evaluateCombinationData.push(currentTournObj)
+            }
         } catch (err) {
             console.log(`ERORROEORRR: `)
             console.log(err)
             if (err) {
                 currentTournObj.name = 'noCurrentTournamentsBasecamp'
-                evaluateCombinationData.push(currentTournObj)
+                if (evaluateCombinationData.length < 3) {
+                    evaluateCombinationData.push(currentTournObj)
+                }
             }
         }
-
+        console.log("AFTER ROUNDS")
+        console.log(evaluateCombinationData)
         // return results table length for k/d calc:
         var resultsTableLength = [];
         if ((document.querySelector("#content > div.main > div.results.screens").getElementsByTagName('table').length) > 2) {
