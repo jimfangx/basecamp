@@ -150,17 +150,21 @@ async function getUpcomingTournamentData(data) {
                 console.log(startHours.substring(0, startHours.indexOf(":")))
                 console.log(startHours.substring(startHours.indexOf(':')))
                 console.log(evaluateCombinationData)
-                if (startHours.substring(0, startHours.indexOf(":")) > new Date().getHours()) {
-                    // if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
+
+                // check date make sure day of week is the same as today
+                if (Date().substring(0, 3) === currentTournObj.start.substring(0, 3)) {
+                    if (startHours.substring(0, startHours.indexOf(":")) >= new Date().getHours()) { //11
+                        // if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
                         console.log("pushing! hour in front")
                         evaluateCombinationData.push(currentTournObj)
                         break;
-                    // }
-                } else if (startHours.substring(0, startHours.indexOf(":")) === new Date().getHours()) {
-                    if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
-                        console.log(`pushing! mins in front, same hour`)
-                        evaluateCombinationData.push(currentTournObj)
-                        break;
+                        // }
+                    } else if (startHours.substring(0, startHours.indexOf(":")) === new Date().getHours()) {
+                        if (startHours.substring(startHours.indexOf(':') + 1) >= new Date().getMinutes()) {
+                            console.log(`pushing! mins in front, same hour`)
+                            evaluateCombinationData.push(currentTournObj)
+                            break;
+                        }
                     }
                 }
                 // else {
