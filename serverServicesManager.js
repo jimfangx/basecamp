@@ -13,10 +13,10 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 
 
-app.post('/', function (req, res) {
+app.post('/', async function (req, res) {
     // console.log(req.body.paradigm)
     let paradigmScrape = require('./judgeAnalysis')
-    let paradigmResults =  paradigmScrape(req.body.paradigm)
+    let paradigmResults = await paradigmScrape(req.body.paradigm)
     // response.setHeader('Content-Type', 'text/html');
     console.log(paradigmResults)
     res.send(paradigmResults)
@@ -29,4 +29,4 @@ app.post('/', function (req, res) {
 // }
 
 app.listen('8080')
-console.log(`Listening at localhost:8000`)
+console.log(`Listening at localhost:8080`)

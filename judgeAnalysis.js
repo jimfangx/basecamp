@@ -50,304 +50,310 @@ var replaceHtmlEntites = (function () {
 // IMPUT Requires paradigm link
 
 // function paradigmScrape(paradigmLink) {
-module.exports = function (paradigmLink) {
-    var returnObject = {
-        paradigmLengthInChar: 0,
-        flow: "",
-        spreadingAllowed: "",
-        techTruth: "",
-        email: "",
-        totalCXRounds: 0,
-        affDecisionsRateTotal: 0,
-        negDecisionsRateTotal: 0,
-        CXRoundsLastYear: 0,
-        affDecisionsRateLastYear: 0,
-        negDecisionsRatesLastYear: 0,
-        handshakes: true,
-        pronouns: "Not specified",
-        tagTeam: true
-    }
-    superagent
-        .get(paradigmLink) //https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574  paradigmLink
-        .end((err, res) => {
-            const $ = cheerio.load(res.text) // load judged past rounds table
-            // console.log(res.text.substring(res.text.indexOf(`<table id="record`)))
-            var paradigm = res.text.substring(res.text.indexOf(`<div class="paradigm">`) + `<div class="paradigm">`.length, getPosition(res.text, '</div>', 6))
-
-            var judge = res.text.substring(res.text.indexOf(`<span class="twothirds">`))
-
-
-
-            var clean;
-            clean = det(paradigm), {
-                fixBrokenEntities: true,
-                removeWidows: true,
-                convertEntities: true,
-                convertDashes: true,
-                convertApostrophes: true,
-                replaceLineBreaks: true,
-                removeLineBreaks: false,
-                useXHTML: true,
-                dontEncodeNonLatin: true,
-                addMissingSpaces: true,
-                convertDotsToEllipsis: true,
-                stripHtml: true,
-                stripHtmlButIgnoreTags: [
-                    "b",
-                    "i",
-                    "em",
-                    "sup"
-                ],
-                stripHtmlAddNewLine: ["li", "/ul"],
-                cb: null
+module.exports = async function (paradigmLink) {
+    return new Promise((resolve, reject) => {
+        try {
+            var returnObject = {
+                paradigmLengthInChar: 0,
+                flow: "",
+                spreadingAllowed: "",
+                techTruth: "",
+                email: "",
+                totalCXRounds: 0,
+                affDecisionsRateTotal: 0,
+                negDecisionsRateTotal: 0,
+                CXRoundsLastYear: 0,
+                affDecisionsRateLastYear: 0,
+                negDecisionsRatesLastYear: 0,
+                handshakes: true,
+                pronouns: "Not specified",
+                tagTeam: true
             }
-            clean = stripHtml(clean.res)
+            superagent
+                .get(paradigmLink) //https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574  paradigmLink
+                .end((err, res) => {
+                    const $ = cheerio.load(res.text) // load judged past rounds table
+                    // console.log(res.text.substring(res.text.indexOf(`<table id="record`)))
+                    var paradigm = res.text.substring(res.text.indexOf(`<div class="paradigm">`) + `<div class="paradigm">`.length, getPosition(res.text, '</div>', 6))
 
-            // if (clean.indexOf(`Your search for ${firstName} ${lastName} returned no judges with paradigms.`) != -1) {
-            //     console.log(`Your search for ${firstName} ${lastName} returned no judges with paradigms. Please try again.`)
-            //     console.log(`Direct Link: https://www.tabroom.com/index/paradigm.mhtml?search_first=${firstName}&search_last=${lastName}`)
-            //     return;
-            // }
+                    var judge = res.text.substring(res.text.indexOf(`<span class="twothirds">`))
 
-            // check for specific words etc
-            console.log(clean.length)
-            returnObject.paradigmLengthInChar = clean.length
-            clean = clean.toLowerCase();
 
-            // check for flowing requirements
-            var flowing = false;
-            for (i = 0; i < flowingSearchdb.length; i++) {
-                if (clean.includes(flowingSearchdb[i])) {
-                    console.log(`:check: Flow judge`)
-                    returnObject.flow = 'true'
-                    flowing = true;
-                    break;
-                }
-            }
-            if (flowing === false) {
-                // check for negetive flowing 
-                var noFlow;
-                for (i = 0; i < noFlowing.length; i++) {
-                    if (clean.includes(noFlowing[i])) {
-                        console.log(`Judge does not flow`)
-                        returnObject.flow = 'false'
-                        noFlow = true;
-                        break;
+
+                    var clean;
+                    clean = det(paradigm), {
+                        fixBrokenEntities: true,
+                        removeWidows: true,
+                        convertEntities: true,
+                        convertDashes: true,
+                        convertApostrophes: true,
+                        replaceLineBreaks: true,
+                        removeLineBreaks: false,
+                        useXHTML: true,
+                        dontEncodeNonLatin: true,
+                        addMissingSpaces: true,
+                        convertDotsToEllipsis: true,
+                        stripHtml: true,
+                        stripHtmlButIgnoreTags: [
+                            "b",
+                            "i",
+                            "em",
+                            "sup"
+                        ],
+                        stripHtmlAddNewLine: ["li", "/ul"],
+                        cb: null
                     }
-                }
-                if (!noFlow) {
-                    if (clean.length < 150) {
-                        console.log(`:x: Flowing not specified or does not flow. Exteremly short paradigm, prob a lay judge. < 150 char`)
-                        returnObject.flow = 'shortParadigm150CharNotSpecified'
-                    } else if (clean.length < 500) {
-                        console.log(`:x: Flowing not specified or does not flow.`)
-                        returnObject.flow = 'notSpecifiedMediumLengthParadigm500Char'
-                    }
-                    else {
-                        console.log(`:x: & :!: Flowing not specified or does not flow, however long paradigm, so prob a flow judge or judge with experience.`)
-                        returnObject.flow = 'notSpecifiedLongParadigm'
-                        flowing = true;
-                    }
-                }
-            }
+                    clean = stripHtml(clean.res)
 
-            // check for spreading
+                    // if (clean.indexOf(`Your search for ${firstName} ${lastName} returned no judges with paradigms.`) != -1) {
+                    //     console.log(`Your search for ${firstName} ${lastName} returned no judges with paradigms. Please try again.`)
+                    //     console.log(`Direct Link: https://www.tabroom.com/index/paradigm.mhtml?search_first=${firstName}&search_last=${lastName}`)
+                    //     return;
+                    // }
 
-            var spreading = false
-            for (i = 0; i < spreadingSearchdb.length; i++) {
-                if (clean.includes(spreadingSearchdb[i])) {
-                    console.log(`:check: Allows spreading`)
-                    returnObject.spreadingAllowed = 'true'
-                    spreading = true;
-                    break;
-                }
-            }
-            if (spreading === false) {
-                var noSpreadvar = false
-                for (i = 0; i < noSpread.length; i++) {
-                    if (clean.includes(noSpread[i]) && clean.length < 10000) { // avoid https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=170624
-                        console.log(`Does not allow spreading`)
-                        returnObject.spreadingAllowed = 'false'
-                        noSpreadvar = true;
-                        break;
+                    // check for specific words etc
+                    console.log(clean.length)
+                    returnObject.paradigmLengthInChar = clean.length
+                    clean = clean.toLowerCase();
+
+                    // check for flowing requirements
+                    var flowing = false;
+                    for (i = 0; i < flowingSearchdb.length; i++) {
+                        if (clean.includes(flowingSearchdb[i])) {
+                            console.log(`:check: Flow judge`)
+                            returnObject.flow = 'true'
+                            flowing = true;
+                            break;
+                        }
                     }
-                }
-                if (!noSpreadvar) {
-                    if (clean.length < 150) {
-                        console.log(`:x: Flowing not specified or does not flow. Exteremly short paradigm, prob a lay judge. < 150 char`)
-                        returnObject.spreadingAllowed = 'shortParadigm150CharNotSpecified'
-                    } else if (clean.length < 500) {
-                        console.log(`:x: Spreading not specified or does not allow spreading.`)
-                        returnObject.spreadingAllowed = 'notSpecifiedMediumLengthParadigm500Char'
+                    if (flowing === false) {
+                        // check for negetive flowing 
+                        var noFlow;
+                        for (i = 0; i < noFlowing.length; i++) {
+                            if (clean.includes(noFlowing[i])) {
+                                console.log(`Judge does not flow`)
+                                returnObject.flow = 'false'
+                                noFlow = true;
+                                break;
+                            }
+                        }
+                        if (!noFlow) {
+                            if (clean.length < 150) {
+                                console.log(`:x: Flowing not specified or does not flow. Exteremly short paradigm, prob a lay judge. < 150 char`)
+                                returnObject.flow = 'shortParadigm150CharNotSpecified'
+                            } else if (clean.length < 500) {
+                                console.log(`:x: Flowing not specified or does not flow.`)
+                                returnObject.flow = 'notSpecifiedMediumLengthParadigm500Char'
+                            }
+                            else {
+                                console.log(`:x: & :!: Flowing not specified or does not flow, however long paradigm, so prob a flow judge or judge with experience.`)
+                                returnObject.flow = 'notSpecifiedLongParadigm'
+                                flowing = true;
+                            }
+                        }
+                    }
+
+                    // check for spreading
+
+                    var spreading = false
+                    for (i = 0; i < spreadingSearchdb.length; i++) {
+                        if (clean.includes(spreadingSearchdb[i])) {
+                            console.log(`:check: Allows spreading`)
+                            returnObject.spreadingAllowed = 'true'
+                            spreading = true;
+                            break;
+                        }
+                    }
+                    if (spreading === false) {
+                        var noSpreadvar = false
+                        for (i = 0; i < noSpread.length; i++) {
+                            if (clean.includes(noSpread[i]) && clean.length < 10000) { // avoid https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=170624
+                                console.log(`Does not allow spreading`)
+                                returnObject.spreadingAllowed = 'false'
+                                noSpreadvar = true;
+                                break;
+                            }
+                        }
+                        if (!noSpreadvar) {
+                            if (clean.length < 150) {
+                                console.log(`:x: Flowing not specified or does not flow. Exteremly short paradigm, prob a lay judge. < 150 char`)
+                                returnObject.spreadingAllowed = 'shortParadigm150CharNotSpecified'
+                            } else if (clean.length < 500) {
+                                console.log(`:x: Spreading not specified or does not allow spreading.`)
+                                returnObject.spreadingAllowed = 'notSpecifiedMediumLengthParadigm500Char'
+                            } else {
+                                console.log(`:x: & :!: Spreading not specified or does not allow spreading or has special rules about spreading, however long paradigm, so prob a flow judge or judge with experience.`)
+                                returnObject.spreadingAllowed = 'notSpecifiedLongParadigm'
+                            }
+                        }
+                    }
+
+                    // tech > truth check
+                    var techOverTruth = false
+                    var truthOverTech = false
+                    var truthIsTech = false
+                    if (!truthOverTech && !truthIsTech) {
+                        for (i = 0; i < techTruthSearchdb.length; i++) { //Tech > Truth
+                            if (clean.includes(techTruthSearchdb[i])) {
+                                console.log(`Tech > Truth`)
+                                returnObject.techTruth = "Tech > Truth"
+                                techOverTruth = true;
+                                break;
+                            }
+                        }
+                    } if (!techOverTruth && !truthIsTech) { //Truth > Tech
+                        for (i = 0; i < truthTechSearchdb.length; i++) {
+                            if (clean.includes(truthTechSearchdb[i])) {
+                                console.log(`Truth > Tech`)
+                                returnObject.techTruth = "Truth > Tech"
+                                truthOverTech = true;
+                                break;
+                            }
+                        }
+                    } if (!techOverTruth && !truthOverTech) {
+                        for (i = 0; i < techistruthdb.length; i++) {
+                            if (clean.includes(techistruthdb[i])) {
+                                console.log(`Tech = Truth`)
+                                returnObject.techTruth = "Truth = Tech"
+                                truthIsTech = true;
+                                break;
+                            }
+                        }
+                    } if (!techOverTruth && !truthOverTech && !truthIsTech) {
+                        if (clean.length < 150) {
+                            console.log(`:x: Does not specify relationship between tech & truth. Exteremly short paradigm, prob a lay judge. < 150 char`)
+                            returnObject.techTruth = "shortParadigm150CharNotSpecified"
+                        } else if (clean.length < 500) {
+                            console.log(`:x: Relationship between tech & truth not specified.`)
+                            returnObject.techTruth = "notSpecifiedMediumLengthParadigm500Char"
+                        } else {
+                            console.log(`:x & :!: Relationship between tech & truth not specified, however long paradigm, so prob a flow judge or judge with experience.`)
+                            returnObject.spreadingAllowed = 'notSpecifiedLongParadigm'
+                        }
+                    }
+
+                    // email chain address
+                    try {
+                        if (clean.includes(`[at]`)) {
+                            console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
+                            returnObject.email = clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                        } else if (clean.includes(`[dot]`)) {
+                            console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
+                            returnObject.email = clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0]
+                        } else if (clean.includes(`dot`) && clean.includes(`[at]`)) {
+                            console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
+                            returnObject.email = clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0]
+                        } else {
+                            console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
+                            returnObject.email = clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
+                        }
+                    } catch (err) {
+                        console.log(`No email address :(`)
+                    }
+
+                    // aff neg decision ratio
+                    var affDecisionsTotal = 0
+                    var negDecisionsTotal = 0
+                    var affDecisionsYear = 0
+                    var negDecisionsYear = 0
+
+
+                    for (i = 0; i < $("#record tr").length; i++) {
+                        var roundTimestamp = $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().substring(0, $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().indexOf("\n"))
+
+                        // console.log((Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000)
+
+                        var ev = $("#record tr").eq(i).find('td').eq(2).text().toLowerCase().trim()
+                        if (ev.includes(`cx`) || ev.includes(`pol`) || ev.includes(`policy`)) {
+                            ev = true
+                        } else {
+                            ev = false
+                        }
+
+                        if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
+                            affDecisionsTotal++
+                            affDecisionsYear++
+                        } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
+                            negDecisionsTotal++
+                            negDecisionsYear++
+                        } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && ev) {
+                            affDecisionsTotal++
+                        } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && ev) {
+                            negDecisionsTotal++
+                        }
+                    }
+                    console.log(`Total policy rounds: ${affDecisionsTotal + negDecisionsTotal}`)
+                    returnObject.totalCXRounds = affDecisionsTotal + negDecisionsTotal
+                    if (affDecisionsTotal === 0 && negDecisionsTotal === 0) {
+                        console.log(`No rounds judged`)
                     } else {
-                        console.log(`:x: & :!: Spreading not specified or does not allow spreading or has special rules about spreading, however long paradigm, so prob a flow judge or judge with experience.`)
-                        returnObject.spreadingAllowed = 'notSpecifiedLongParadigm'
+                        console.log(`Aff total decision rate: ${(affDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
+                        console.log(`Neg total decision ratio: ${(negDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
+                        returnObject.affDecisionsRateTotal = (affDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)
+                        returnObject.negDecisionsRateTotal = (negDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)
                     }
-                }
-            }
-
-            // tech > truth check
-            var techOverTruth = false
-            var truthOverTech = false
-            var truthIsTech = false
-            if (!truthOverTech && !truthIsTech) {
-                for (i = 0; i < techTruthSearchdb.length; i++) { //Tech > Truth
-                    if (clean.includes(techTruthSearchdb[i])) {
-                        console.log(`Tech > Truth`)
-                        returnObject.techTruth = "Tech > Truth"
-                        techOverTruth = true;
-                        break;
+                    if (affDecisionsYear === 0 && negDecisionsYear === 0) {
+                        console.log(`No rounds judged within last year`)
+                    } else {
+                        console.log(`Aff last year decision ratio: ${(affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+                        console.log(`Neg last year decision ratio: ${(negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
+                        returnObject.affDecisionsRateLastYear = (affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)
+                        returnObject.negDecisionsRatesLastYear = (negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)
                     }
-                }
-            } if (!techOverTruth && !truthIsTech) { //Truth > Tech
-                for (i = 0; i < truthTechSearchdb.length; i++) {
-                    if (clean.includes(truthTechSearchdb[i])) {
-                        console.log(`Truth > Tech`)
-                        returnObject.techTruth = "Truth > Tech"
-                        truthOverTech = true;
-                        break;
+
+                    // handshaking ok?
+                    var handshake = true
+                    for (i = 0; i < noHandshakes.length; i++) {
+                        if (clean.includes(noHandshakes[i])) {
+                            handshake = false
+                            returnObject.handshakes = false
+                            break
+                        }
                     }
-                }
-            } if (!techOverTruth && !truthOverTech) {
-                for (i = 0; i < techistruthdb.length; i++) {
-                    if (clean.includes(techistruthdb[i])) {
-                        console.log(`Tech = Truth`)
-                        returnObject.techTruth = "Truth = Tech"
-                        truthIsTech = true;
-                        break;
+                    console.log(`Handshakes (Defaults to Yes if not specified): ${handshake ? "Yes" : "No"}`)
+
+                    // pronouns - Pronoun list source: https://www1.nyc.gov/assets/hra/downloads/pdf/services/lgbtqi/Gender%20Pronouns%20final%20draft%2010.23.17.pdf
+                    var pronounFinal = "Not specified"
+                    for (i = 0; i < pronouns.length; i++) {
+                        if (clean.includes(pronouns[i])) {
+                            pronounFinal = pronouns[i]
+                            break
+                        }
                     }
-                }
-            } if (!techOverTruth && !truthOverTech && !truthIsTech) {
-                if (clean.length < 150) {
-                    console.log(`:x: Does not specify relationship between tech & truth. Exteremly short paradigm, prob a lay judge. < 150 char`)
-                    returnObject.techTruth = "shortParadigm150CharNotSpecified"
-                } else if (clean.length < 500) {
-                    console.log(`:x: Relationship between tech & truth not specified.`)
-                    returnObject.techTruth = "notSpecifiedMediumLengthParadigm500Char"
-                } else {
-                    console.log(`:x & :!: Relationship between tech & truth not specified, however long paradigm, so prob a flow judge or judge with experience.`)
-                    returnObject.spreadingAllowed = 'notSpecifiedLongParadigm'
-                }
-            }
+                    console.log(`Pronouns: ${pronounFinal}`)
+                    returnObject.pronouns = pronounFinal
 
-            // email chain address
-            try {
-                if (clean.includes(`[at]`)) {
-                    console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
-                    returnObject.email = clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
-                } else if (clean.includes(`[dot]`)) {
-                    console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
-                    returnObject.email = clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0]
-                } else if (clean.includes(`dot`) && clean.includes(`[at]`)) {
-                    console.log(clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0])
-                    returnObject.email = clean.match(/([a-zA-Z0-9._-]+\[at\][a-zA-Z0-9._-]+\[dot\][a-zA-Z0-9_-]+)/)[0]
-                } else {
-                    console.log(clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0])
-                    returnObject.email = clean.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/)[0]
-                }
-            } catch (err) {
-                console.log(`No email address :(`)
-            }
+                    // tag team
+                    var tagTeamOK = true;
+                    for (i = 0; i < noTagCX.length; i++) {
+                        if (clean.includes(noTagCX[i])) {
+                            tagTeamOK = false;
+                            returnObject.tagTeam = false
+                            break
+                        }
+                    }
+                    console.log(`Tag Team CX (Defaults to Yes if not specified): ${tagTeamOK ? "Yes" : "No"}`)
 
-            // aff neg decision ratio
-            var affDecisionsTotal = 0
-            var negDecisionsTotal = 0
-            var affDecisionsYear = 0
-            var negDecisionsYear = 0
+                    // Lay / Flow final verdict
+                    if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && !flowing) {
+                        console.log(`Ultimate Rating: Lay judge`)
+                        // returnObject.
+                    } else if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && flowing && !clean.includes(`i hate lay`)) {
+                        console.log(`Ultimate Rating: Flay judge`)
+                    } else if (clean.includes(`flow`) && clean.length > 500) {
+                        console.log(`Ultimate Rating: Flow judge`)
+                    }
 
-
-            for (i = 0; i < $("#record tr").length; i++) {
-                var roundTimestamp = $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().substring(0, $("#record tr").eq(i).find('td').eq(1).text().toLowerCase().trim().indexOf("\n"))
-
-                // console.log((Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000)
-
-                var ev = $("#record tr").eq(i).find('td').eq(2).text().toLowerCase().trim()
-                if (ev.includes(`cx`) || ev.includes(`pol`) || ev.includes(`policy`)) {
-                    ev = true
-                } else {
-                    ev = false
-                }
-
-                if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
-                    affDecisionsTotal++
-                    affDecisionsYear++
-                } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && (Math.trunc(new Date().getTime() / 1000) - roundTimestamp) / 31536000 <= 1 && ev) {
-                    negDecisionsTotal++
-                    negDecisionsYear++
-                } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "aff" && ev) {
-                    affDecisionsTotal++
-                } else if ($("#record tr").eq(i).find('td').eq(6).text().toLowerCase().trim() === "neg" && ev) {
-                    negDecisionsTotal++
-                }
-            }
-            console.log(`Total policy rounds: ${affDecisionsTotal + negDecisionsTotal}`)
-            returnObject.totalCXRounds = affDecisionsTotal + negDecisionsTotal
-            if (affDecisionsTotal === 0 && negDecisionsTotal === 0) {
-                console.log(`No rounds judged`)
-            } else {
-                console.log(`Aff total decision rate: ${(affDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
-                console.log(`Neg total decision ratio: ${(negDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)}%`)
-                returnObject.affDecisionsRateTotal = (affDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)
-                returnObject.negDecisionsRateTotal = (negDecisionsTotal / (affDecisionsTotal + negDecisionsTotal) * 100)
-            }
-            if (affDecisionsYear === 0 && negDecisionsYear === 0) {
-                console.log(`No rounds judged within last year`)
-            } else {
-                console.log(`Aff last year decision ratio: ${(affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
-                console.log(`Neg last year decision ratio: ${(negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)}%`)
-                returnObject.affDecisionsRateLastYear = (affDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)
-                returnObject.negDecisionsRatesLastYear = (negDecisionsYear / (affDecisionsYear + negDecisionsYear) * 100)
-            }
-
-            // handshaking ok?
-            var handshake = true
-            for (i = 0; i < noHandshakes.length; i++) {
-                if (clean.includes(noHandshakes[i])) {
-                    handshake = false
-                    returnObject.handshakes = false
-                    break
-                }
-            }
-            console.log(`Handshakes (Defaults to Yes if not specified): ${handshake ? "Yes" : "No"}`)
-
-            // pronouns - Pronoun list source: https://www1.nyc.gov/assets/hra/downloads/pdf/services/lgbtqi/Gender%20Pronouns%20final%20draft%2010.23.17.pdf
-            var pronounFinal = "Not specified"
-            for (i = 0; i < pronouns.length; i++) {
-                if (clean.includes(pronouns[i])) {
-                    pronounFinal = pronouns[i]
-                    break
-                }
-            }
-            console.log(`Pronouns: ${pronounFinal}`)
-            returnObject.pronouns = pronounFinal
-
-            // tag team
-            var tagTeamOK = true;
-            for (i = 0; i < noTagCX.length; i++) {
-                if (clean.includes(noTagCX[i])) {
-                    tagTeamOK = false;
-                    returnObject.tagTeam = false
-                    break
-                }
-            }
-            console.log(`Tag Team CX (Defaults to Yes if not specified): ${tagTeamOK ? "Yes" : "No"}`)
-
-            // Lay / Flow final verdict
-            if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && !flowing) {
-                console.log(`Ultimate Rating: Lay judge`)
-                // returnObject.
-            } else if ((clean.includes(` lay `) || clean.includes(`parent judge`)) && flowing && !clean.includes(`i hate lay`)) {
-                console.log(`Ultimate Rating: Flay judge`)
-            } else if (clean.includes(`flow`) && clean.length > 500) {
-                console.log(`Ultimate Rating: Flow judge`)
-            }
-
-            // console.log(returnObject)
-            return returnObject
-        });
-    // personID++;
-    // }
-    // return returnObject;
+                    // console.log(returnObject)
+                    resolve(returnObject)
+                });
+        } catch (err) {
+            reject(err)
+        }
+        // personID++;
+        // }
+        // return returnObject;
+    })
 }
 
 // module.exports.paradigmScrape = paradigmScrape(paradigmLink)
