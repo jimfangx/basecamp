@@ -58,6 +58,7 @@ async function getUpcomingTournamentData(data) {
     const browser = await puppeteer.launch({ headless: true, defaultViewport: null })
     const page = await browser.newPage();
     await page.goto(`https://www.tabroom.com/index/index.mhtml`)
+    // await page.goto(`file:///D:/Downloads/Tabroom.com.html`)
     // await page.addScriptTag({ url: 'https://code.jquery.com/jquery-3.2.1.min.js' })
     await page.waitFor(500);
     await page.click(`#toprow > span.login > a`)
