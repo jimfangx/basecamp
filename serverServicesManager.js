@@ -27,7 +27,9 @@ app.post('/', async function (req, res) {
             returnDataToMain.push(paradigmResults)
         }
         if (module[i] === '2nr') {
-
+            let twoNRScrape = require('./2nrFrequencySearch')
+            let twoNRResults = await twoNRScrape(req.body.wikiNeg)
+            returnDataToMain.push(twoNRResults)
         }
         if (module[i] === 'speechdrop') {
 
