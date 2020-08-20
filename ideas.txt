@@ -1,0 +1,9 @@
+ - sci hub from db8bot & outline.com major us news bypass - with exec history preferred
+ - no frills chain management
+ - autocomplete - store your generic blocks type one word and they come out
+ - leaderboards
+
+
+ stuff needed:
+ - settings to determine if auto exec happens and if yes which
+ - user's own entry code?

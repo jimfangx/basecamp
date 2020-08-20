@@ -16,9 +16,8 @@ module.exports = async function (wikiLink) {
                     roundsArray: null,
                     mostOccuringArg: "",
                     timesOccured: 0,
-                    reportsEmpty: false,
-                    checkReportsLowEntry: false,
-                    link: ""
+                    noResult: false,
+                    checkReportsLowEntry: false
                 }
                 // main value entering loop  
                 for (var i = 1; i < $("#tblReports tr").length; i++) { //1
@@ -407,18 +406,23 @@ module.exports = async function (wikiLink) {
                 for (var i = 0; i < occurenceNum.length; i++) {
                     if (occurenceNum[i] === Math.max(...occurenceNum)) {
                         console.log(`Most occuring arg: ${twoNRsfrequency[i]} at ${occurenceNum[i]} times`)
+                        returnObject.mostOccuringArg = woNRsfrequency[i]
+                        returnObject.timesOccured = occurenceNum[i]
                     }
                 }
                 if (occurenceNum.length === 0 || occurenceNum === undefined) {
-                    console.log(`Round reports empty.`)
+                    console.log(`No result either due to no round reports or because entry uniformity not found.`)
+                    returnObject.noResult = true
                     console.log($("#tblReports tr").length)
                     if ($("#tblReports tr").length === 2) {
                         console.log(`Only has 1 round. Their entry might not be uniformed. Check their round report here: ${link}`)
+                        returnObject.checkReportsLowEntry = true
                     }
                 }
 
                 // push here
-                
+                returnObject.roundsArray = rounds
+                resolve(returnObject)
             })
         } catch (err) {
             reject(err)

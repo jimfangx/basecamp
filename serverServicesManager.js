@@ -32,7 +32,9 @@ app.post('/', async function (req, res) {
             returnDataToMain.push(twoNRResults)
         }
         if (module[i] === 'speechdrop') {
-
+            let speechdropAutocreate = require('./speechdrop')
+            let speechdropLink = await speechdropAutocreate(reg.body.speechdrop)
+            returnDataToMain.push(speechdropLink)
         }
     }
     res.send(returnDataToMain)
