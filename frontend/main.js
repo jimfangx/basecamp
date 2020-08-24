@@ -44,7 +44,7 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
     $('#kd').html(`<small class="text-muted" id="mutedHelperText">KD Ratio: </small>${message[4][0]} Wins/${message[4][1]} Losses - KD: ${Math.ceil((message[4][0] / message[4][1]) * 100) / 100}`)
 
     if (autoProcessing) {
-        var modules = 'judge'
+        var modules = 'judge,speechdrop'
         var settings = {
             "url": `http://localhost:8080/?module=${modules}`,
             "method": "POST",
@@ -53,7 +53,8 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "paradigm": `https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`
+                "paradigm": `https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`,
+                "speechdrop": `BasecampVG-VS-BasecampJF-TEST`
                 // `${message[2].paradigmLink}`
             }
         };

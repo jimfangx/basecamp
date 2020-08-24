@@ -14,8 +14,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 
 app.post('/', async function (req, res) {
-    // console.log(req.query.module)
-    var module = req.query.module.split(',')
+    console.log(req.query.module)
+    var module = req.query.module.toString().split(',')
     // console.log(module.length)
     var returnDataToMain = []
     for (i = 0; i < module.length; i++) {
@@ -33,7 +33,13 @@ app.post('/', async function (req, res) {
         }
         if (module[i] === 'speechdrop') {
             let speechdropAutocreate = require('./speechdrop')
-            let speechdropLink = await speechdropAutocreate(reg.body.speechdrop)
+            // console.log(req.body.speechdrop)
+            let speechdropLink = await speechdropAutocreate(req.body.speechdrop)
+            // while (!speechdropLink.includes('speechdrop.net')) {
+            //     setTimeout(() => {
+            //         // returnDataToMain.push(speechdropLink)
+            //     }, 5000);
+            // }
             returnDataToMain.push(speechdropLink)
         }
     }

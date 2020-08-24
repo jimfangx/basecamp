@@ -7,3 +7,5 @@
  stuff needed:
  - settings to determine if auto exec happens and if yes which
  - user's own entry code?
+
+ - link gui buttons to actuall requests for stuff
