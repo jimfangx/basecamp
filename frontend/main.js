@@ -43,7 +43,7 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
     $('#numberOfTournaments').html(`<small class="text-muted" id="mutedHelperText">Total # of Tournaments: </small>${tournAttended}`)
     $('#kd').html(`<small class="text-muted" id="mutedHelperText">KD Ratio: </small>${message[4][0]} Wins/${message[4][1]} Losses - KD: ${Math.ceil((message[4][0] / message[4][1]) * 100) / 100}`)
 
-    if (autoProcessing) {
+    if (autoProcessing) { // for auto processing
         var modules = 'judge,speechdrop'
         var settings = {
             "url": `http://localhost:8080/?module=${modules}`,
@@ -63,4 +63,14 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
             console.log(response);
         });
     }
+})
+
+
+// manual processing
+$('.2nrSearch').on('click', function () {
+
+})
+
+$('.1acSearch').on('click', function() {
+
 })
