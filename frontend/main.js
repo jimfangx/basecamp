@@ -68,6 +68,10 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
 
 // manual processing
 $('.2nrSearch').on('click', function () {
+    console.log(`2nrClick`)
+})
+
+$('.1acSearch').on('click', function() {
 
 })
 
