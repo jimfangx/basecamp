@@ -68,7 +68,19 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
 
 // manual processing
 $('.2nrSearch').on('click', function () {
-    console.log(`2nrClick`)
+    var modules = `2nr`
+    var settings = {
+        "url": `http://localhost:8080/?module=${modules}`,
+        "method": "POST",
+        "timeout": 0,
+        "headers": {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "data": {
+            "paradigm": `https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`
+        }
+    };
+
 })
 
 $('.1acSearch').on('click', function() {
