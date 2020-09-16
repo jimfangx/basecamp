@@ -19,7 +19,7 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
     if (message[1].name != 'noUpcomingTournamentsBasecamp' && message[2].name != 'noCurrentTournamentsBasecamp') {
         document.getElementById('mainTag').innerHTML = `<small class="text-muted" id="mutedHelperText">Now: </small>${message[2].name} - ${message[2].side}` // show current tournament first
         document.getElementById('oppoent').innerHTML = `<small class="text-muted" id="mutedHelperText">Oppoent: </small>${message[2].oppoent}`
-        document.getElementById('judge').innerHTML = `<small class="text-muted" id="mutedHelperText">Judge: </small><a href="${message[2].paradigmLink}" class="text-decoration-none" style="color: black;">${message[2].judge}</a>`
+        document.getElementById('judge').innerHTML = `<small class="text-muted" id="mutedHelperText">Judge: </small><a href="${message[2].paradigmLink}" class="text-decoration-none" style="color: black;" target=”_blank”>${message[2].judge}</a>`
         document.getElementById('room').innerHTML = `<small class="text-muted" id="mutedHelperText">Room: </small>${message[2].room}`
         document.getElementById('datesAndStartTimes').innerHTML = `<small class="text-muted" id="mutedHelperText">Start Time: </small>${message[2].start}`
         document.getElementById('eventAndRound').innerHTML = `<small class="text-muted" id="mutedHelperText">Round: </small>${message[2].round}`
@@ -44,7 +44,7 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
     $('#kd').html(`<small class="text-muted" id="mutedHelperText">KD Ratio: </small>${message[4][0]} Wins/${message[4][1]} Losses - KD: ${Math.ceil((message[4][0] / message[4][1]) * 100) / 100}`)
 
     if (autoProcessing) { // for auto processing
-        var modules = 'judge,speechdrop'
+        var modules = 'speechdrop,judge'
         var settings = {
             "url": `http://localhost:8080/?module=${modules}`,
             "method": "POST",
@@ -53,8 +53,9 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "paradigm": `https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`,
-                "speechdrop": `BasecampVG-VS-BasecampJF-TEST`
+
+                "speechdrop": `College Prep TX v. ${message[2].oppoent}-TEST`,
+                "paradigm": `${message[2].paradigmLink}`
                 // `${message[2].paradigmLink}`
             }
         };
@@ -68,25 +69,56 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
 
 // manual processing
 $('.2nrSearch').on('click', function () {
-    var modules = `2nr`
-    var settings = {
-        "url": `http://localhost:8080/?module=${modules}`,
-        "method": "POST",
-        "timeout": 0,
-        "headers": {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        "data": {
-            "paradigm": `https://www.tabroom.com/index/paradigm.mhtml?judge_person_id=88574`
-        }
-    };
+
+    ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow')
+
+    ipcRenderer.on('wikiInputIndexjsMainjs', (event, message) => {
+        var modules = `judge`
+        var settings = {
+            "url": `http://localhost:8080/?module=${modules}`,
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "data": {
+                "paradigm": `${message}`
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+        });
+
+    })
 
 })
 
-$('.1acSearch').on('click', function() {
 
+$('.1acSearch').on('click', function () {
+    ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow')
+
+    ipcRenderer.on('wikiInputIndexjsMainjs', (event, message) => {
+        var modules = `judge`
+        var settings = {
+            "url": `http://localhost:8080/?module=${modules}`,
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "data": {
+                "paradigm": `${message}`
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+        });
+
+    })
 })
 
-$('.1acSearch').on('click', function() {
+$('.1acSearch').on('click', function () {
 
 })

@@ -2,6 +2,7 @@ const electron = require('electron')
 const { app, BrowserWindow, ipcMain, Menu, ClientRequest, session, powerSaveBlocker, globalShortcut } = electron;
 let mainWindow;
 let authWindow;
+let linkWindow;
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { start } = require('repl');
@@ -152,31 +153,33 @@ async function getUpcomingTournamentData(data) {
                 console.log(startHours.substring(startHours.indexOf(':')))
                 console.log(evaluateCombinationData)
 
-                // check date make sure day of week is the same as today
-                if (Date().substring(0, 3) === currentTournObj.start.substring(0, 3)) {
-                    if (startHours.substring(0, startHours.indexOf(":")) >= new Date().getHours()) { //11
-                        // if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
-                        console.log("pushing! hour in front")
-                        evaluateCombinationData.push(currentTournObj)
-                        break;
-                        // }
-                    } else if (startHours.substring(0, startHours.indexOf(":")) === new Date().getHours()) {
-                        if (startHours.substring(startHours.indexOf(':') + 1) >= new Date().getMinutes()) {
-                            console.log(`pushing! mins in front, same hour`)
-                            evaluateCombinationData.push(currentTournObj)
-                            break;
-                        }
-                    }
-                }
+                // // check date make sure day of week is the same as today - cancelled for now as covid & tab doesnt spec timezone
+
+                // if (Date().substring(0, 3) === currentTournObj.start.substring(0, 3)) {
+                //     if (startHours.substring(0, startHours.indexOf(":")) >= new Date().getHours()) { //11
+                //         // if (startHours.substring(startHours.indexOf(':')+1) > new Date().getMinutes()) {
+                //         console.log("pushing! hour in front")
+                //         evaluateCombinationData.push(currentTournObj)
+                //         break;
+                //         // }
+                //     } else if (startHours.substring(0, startHours.indexOf(":")) === new Date().getHours()) {
+                //         if (startHours.substring(startHours.indexOf(':') + 1) >= new Date().getMinutes()) {
+                //             console.log(`pushing! mins in front, same hour`)
+                //             evaluateCombinationData.push(currentTournObj)
+                //             break;
+                //         }
+                //     }
+                // }
                 // else {
                 //     mostRecentCurrent++;
                 // }
             }
             console.log("FINAL LENGTH" + evaluateCombinationData.length)
-            if (evaluateCombinationData.length < 3) {
-                currentTournObj.name = 'noCurrentTournamentsBasecamp'
-                evaluateCombinationData.push(currentTournObj)
-            }
+            // if (evaluateCombinationData.length < 3) { //- lets see what happens - covid times are all messed up cause tab doesnt keep timezones
+            //     currentTournObj.name = 'noCurrentTournamentsBasecamp'
+            //     evaluateCombinationData.push(currentTournObj)
+            // }
+            evaluateCombinationData.push(currentTournObj) // i am just gonna push it and see what happens
         } catch (err) {
             console.log(`ERORROEORRR: `)
             console.log(err)
@@ -345,7 +348,31 @@ async function getUpcomingTournamentData(data) {
     // await mainWindow.webContents.send('tabAuthDataReturnIndexjsMainjs', returnData)
 }
 
+ipcMain.on('mainjsIndexjsForWikiInputOpenWindow', async (event, data) => {
+    linkWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    linkWindow.loadFile('wikiInput.html')
+    linkWindow.show()
 
+    
+})
+
+ipcMain.on('wikiInputjsindexjsValue', async (event, data) => {
+    console.log("received! wikiInputjsindexjsValue" + data)
+
+    linkWindow.close()
+    mainWindow.webContents.send('wikiInputIndexjsMainjs', data)
+
+    
+    // console.log(data)
+   
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
