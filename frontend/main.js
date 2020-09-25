@@ -82,7 +82,7 @@ $('.2nrSearch').on('click', function () {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "paradigm": `${message}`
+                "wiki": `${message}`
             }
         };
 
@@ -108,7 +108,7 @@ $('.1acSearch').on('click', function () {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "paradigm": `${message}`
+                "wiki": `${message}`
             }
         };
 
@@ -119,6 +119,48 @@ $('.1acSearch').on('click', function () {
     })
 })
 
-$('.1acSearch').on('click', function () {
+$('.judge').on('click', function () {
+    ipcRenderer.send('mainjsIndexjsForJudgeInputOpenWindow')
 
+    ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
+        var modules = `judge`
+        var settings = {
+            "url": `http://localhost:8080/?module=${modules}`,
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "data": {
+                "paradigm": `${message}`
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+        });
+    })
 })
+
+$('.speechdrop').on('click', function () {
+    ipcRenderer.send('mainjsIndexjsForSpeechdrop')
+    ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
+        var modules = `speechdrop`
+        var settings = {
+            "url": `http://localhost:8080/?module=${modules}`,
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "data": {
+                "speechdrop": `${message}`
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+        });
+    })
+})
+

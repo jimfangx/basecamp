@@ -13,11 +13,16 @@
     font-family: 'Open Sans', sans-serif;
     font-style: italic;
     font-size: 11px;
-    white-space: nowrap;
-    overflow: hidden;
+    color: #121212;
+    /* white-space: nowrap; */
+    /* overflow: hidden; */
     /* padding-top: 4px; */
     /* width: 188px; */
-    vertical-align: middle;
+    /* vertical-align: middle;
+    margin: 0;
+    top: 50%;
+    -ms-transform: translateY(-50%); */
+    /* transform: translateY(-50%); */
 }
 
 .centerDiv {

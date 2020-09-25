@@ -348,6 +348,8 @@ async function getUpcomingTournamentData(data) {
     // await mainWindow.webContents.send('tabAuthDataReturnIndexjsMainjs', returnData)
 }
 
+
+// wiki input module
 ipcMain.on('mainjsIndexjsForWikiInputOpenWindow', async (event, data) => {
     linkWindow = new BrowserWindow({
         width: 800,
@@ -360,7 +362,7 @@ ipcMain.on('mainjsIndexjsForWikiInputOpenWindow', async (event, data) => {
     linkWindow.loadFile('wikiInput.html')
     linkWindow.show()
 
-    
+
 })
 
 ipcMain.on('wikiInputjsindexjsValue', async (event, data) => {
@@ -369,11 +371,53 @@ ipcMain.on('wikiInputjsindexjsValue', async (event, data) => {
     linkWindow.close()
     mainWindow.webContents.send('wikiInputIndexjsMainjs', data)
 
-    
+
     // console.log(data)
-   
+
 })
 
+
+// judge input module
+ipcMain.on('mainjsIndexjsForJudgeInputOpenWindow', async (event, data) => {
+    linkWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    linkWindow.loadFile('judgeInput.html')
+    linkWindow.show()
+})
+
+ipcMain.on('judgeInputjsindexjsValue', async (event, data) => {
+    console.log("received! judgeInputjsindexjsValue" + data)
+    linkWindow.close()
+    mainWindow.webContents.send('judgeInputIndexjsMainjs', data) // bounce dat data 0.0
+})
+
+
+//Speechdrop module
+
+ipcMain.on('mainjsIndexjsForSpeechdrop', async (event, data) => {
+    linkWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    linkWindow.loadFile('speechdropInput.html')
+    linkWindow.show()
+})
+
+ipcMain.on('speechdropInputjsindexjsValue', async (event, data) => {
+    console.log("received! speechdropInputjsindexjsValue" + data)
+    linkWindow.close()
+    mainWindow.webContents.send('judgeInputIndexjsMainjs', data)
+})
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
