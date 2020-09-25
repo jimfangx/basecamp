@@ -17,7 +17,18 @@
   },
   "homepage": "https://github.com/AirFusion45/basecamp#readme",
   "dependencies": {
+    "body-parser": "^1.19.0",
     "cheerio": "^1.0.0-rc.3",
-    "request": "^2.88.2"
+    "detergent": "^5.11.1",
+    "express": "^4.17.1",
+    "follow-redirects": "^1.13.0",
+    "google-scholar-link": "^1.0.1",
+    "html-to-docx": "^1.1.29",
+    "moment": "^2.27.0",
+    "puppeteer": "^3.3.0",
+    "querystring": "^0.2.0",
+    "request": "^2.88.2",
+    "string-strip-html": "^4.5.1",
+    "superagent": "^5.3.1"
   }
 }

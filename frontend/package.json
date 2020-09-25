@@ -1,0 +1,16 @@
+{
+  "name": "frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron ."
+  },
+  "author": "AirFusion45",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^9.0.5",
+    "puppeteer": "^5.0.0"
+  }
+}

@@ -1,0 +1,30 @@
+ALPHA:
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg
+    https://hspolicy.debatecoaches.org/Dulles/Dawar-Joshi%20Neg
+    https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg
+    https://hspolicy.debatecoaches.org/Archbishop%20Mitty/Dua-Ray%20Neg
+
+BETA:
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Balanovsky-Behnke%20Neg (Cap @ 2 | military futurology @ 2)
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Self-Gentleman%20Neg (Taiwan CP @ 2 | Pending issue: China deterrence & deterrence da mixes -> deterrence da was marked as china deterrence da in 1nc)
+    https://hspolicy.debatecoaches.org/Advanced%20Technologies%20Academy/Fritchel-Lewis%20Neg (Empty)
+    https://hspolicy.debatecoaches.org/Airline/Rich-Mathers%20Neg (T-substantial @ 2, Houthi da @ 2)
+    https://hspolicy.debatecoaches.org/Airline/Mathers-Tivakaran%20Neg (t sub @ 2, double down cp at 2, t-substntial @ 2 ---> Aliais stuff)
+    https://hspolicy.debatecoaches.org/Airline/Rich-Latcha%20Neg (houthi win war base @ 1, houthi da @ 1, win the war cp @ 1, houthi vicotry did da @ 1, end use cp @ 1, fw @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Demars-Russell%20Neg (round reports Empty)
+    https://hspolicy.debatecoaches.org/Airline/Norman-Gibson%20Neg (Single entry not uniformed team)
+    https://hspolicy.debatecoaches.org/Airline/Norman-Russell%20Neg (conditions cp @ 1, executive cp @ 1, saudi gender cp @ 1, russia dib case @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Brual-Presley%20Neg (russia fill in da @ 1, end use cp @ 1, case @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Nourse-Pirhalla%20Neg (End use cp @ 1, Russia fill in da @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Saunders-Scott%20Neg (Russia fill in @ 1, end use cp @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Dennis-Russell%20Neg (CP @ 1, dib fill in @ 1 -> Context for CP: Conditions. Maybe can add context fetch. Sneak up to aboe and get the CP)
+    https://hspolicy.debatecoaches.org/Airline/Gibson-Saunders%20Neg (Cred da @ 1, end use cp @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Pirhalla-Buckley%20Neg (Climate change @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Presley-Moon%20Neg (houthi victory da @ 1, end use cp @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Dennis-Hall%20Neg (conditions cp @ 1, russia da @ 1, primacy da @ 1, russia fill-in da @ 1)
+    https://hspolicy.debatecoaches.org/Airline/Russel-Gibson%20Neg (Round reports empty)
+    https://hspolicy.debatecoaches.org/Airline/Norman-MitchellWilson%20Neg (conditions cp @ 1, relations da @ 1)
+
+
+Stuffz to do in this function: 
+    Alias stuff? ref self-gentleman neg ATAcad & rich mathers airline (not documented in link)

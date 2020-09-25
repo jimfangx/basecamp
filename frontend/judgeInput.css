@@ -1,0 +1,31 @@
+#tabroomText {
+    font-family: 'Bebas Neue', cursive;
+    font-size: 32px;
+    margin-top: 8px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #121212;
+    text-decoration: none;
+}
+
+#projectOfThe {
+    font-family: 'Open Sans', sans-serif;
+    font-style: italic;
+    font-size: 11px;
+    color: #121212;
+    /* white-space: nowrap; */
+    /* overflow: hidden; */
+    /* padding-top: 4px; */
+    /* width: 188px; */
+    /* vertical-align: middle;
+    margin: 0;
+    top: 50%;
+    -ms-transform: translateY(-50%); */
+    /* transform: translateY(-50%); */
+}
+
+.centerDiv {
+    display: flex;
+    justify-content: center;
+}
