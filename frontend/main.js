@@ -164,3 +164,24 @@ $('.speechdrop').on('click', function () {
     })
 })
 
+$('.scihub').on('click', function () {
+    ipcRenderer.send('mainjsIndexjsForSpeechdrop')
+    ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
+        var modules = `speechdrop`
+        var settings = {
+            "url": `http://localhost:8080/?module=${modules}`,
+            "method": "POST",
+            "timeout": 0,
+            "headers": {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            "data": {
+                "speechdrop": `${message}`
+            }
+        };
+
+        $.ajax(settings).done(function (response) {
+            console.log(response);
+        });
+    })
+})
