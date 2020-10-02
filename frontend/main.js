@@ -121,7 +121,6 @@ $('.1acSearch').on('click', function () {
 
 $('.judge').on('click', function () {
     ipcRenderer.send('mainjsIndexjsForJudgeInputOpenWindow')
-
     ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
         var modules = `judge`
         var settings = {
@@ -144,7 +143,7 @@ $('.judge').on('click', function () {
 
 $('.speechdrop').on('click', function () {
     ipcRenderer.send('mainjsIndexjsForSpeechdrop')
-    ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
+    ipcRenderer.on('speechdropInputIndexjsMainjs', (event, message) => {
         var modules = `speechdrop`
         var settings = {
             "url": `http://localhost:8080/?module=${modules}`,
@@ -165,9 +164,9 @@ $('.speechdrop').on('click', function () {
 })
 
 $('.scihub').on('click', function () {
-    ipcRenderer.send('mainjsIndexjsForSpeechdrop')
-    ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
-        var modules = `speechdrop`
+    ipcRenderer.send('mainjsIndexjsForScihub')
+    ipcRenderer.on('scihubInputIndexjsMainjs', (event, message) => {
+        var modules = `scihub`
         var settings = {
             "url": `http://localhost:8080/?module=${modules}`,
             "method": "POST",
@@ -176,7 +175,7 @@ $('.scihub').on('click', function () {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "speechdrop": `${message}`
+                "scihub": `${message}`
             }
         };
 

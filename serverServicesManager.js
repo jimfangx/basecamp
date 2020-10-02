@@ -59,6 +59,11 @@ app.post('/', async function (req, res) {
       let oneACResults = await oneACScrape(req.body.wiki)
       returnDataToMain.push(oneACResults)
     }
+    if (module[i] === 'scihub') {
+      let sciHubModule = require('./scihub')
+      let scihubResults = await sciHubModule(req.body.scihub)
+      returnDataToMain.push(scihubResults)
+    }
 
   }
   // while (true) {

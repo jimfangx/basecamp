@@ -416,8 +416,29 @@ ipcMain.on('mainjsIndexjsForSpeechdrop', async (event, data) => {
 ipcMain.on('speechdropInputjsindexjsValue', async (event, data) => {
     console.log("received! speechdropInputjsindexjsValue" + data)
     linkWindow.close()
-    mainWindow.webContents.send('judgeInputIndexjsMainjs', data)
+    mainWindow.webContents.send('speechdropInputIndexjsMainjs', data)
 })
+
+// scihub module
+ipcMain.on('mainjsIndexjsForScihub', async (event, data) => { //from main.js to open input window
+    linkWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    linkWindow.loadFile('scihubInput.html')
+    linkWindow.show()
+})
+ipcMain.on('scihubInputjsindexjsValue', async (event, data) => { // after data input
+    console.log("received! scihubInputjsindexjsValue" + data)
+    linkWindow.close()
+    mainWindow.webContents.send('scihubInputIndexjsMainjs', data)
+})
+
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
