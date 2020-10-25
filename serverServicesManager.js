@@ -1,6 +1,7 @@
 const express = require('express')
 const { response } = require('express');
-var bodyParser = require('body-parser')
+var bodyParser = require('body-parser');
+const scihub = require('./scihub');
 var app = express()
 // bodyParser = require('body-parser');
 
@@ -22,7 +23,33 @@ function delay() {
   });
 }
 
+// app.post('/', async function (req, res) {
+// async function distributeTasksFetchResults(req, res) {
+
+//   return new Promise((resolve, reject) => {
+
+//     if (returnDataToMain != []) {
+//       resolve(returnDataToMain)
+//     } else {
+//       reject(`empty!`)
+//     }
+//   })
+
+// }
+
+// while (true) {
+//     if (returnDataToMain.length === module.length) {
+//         res.send(returnDataToMain)
+//         break;
+//     }
+// } 
+
 app.post('/', async function (req, res) {
+
+  // res.send(returnDataToMain)
+  // let final = await distributeTasksFetchResults(req, res)
+  // console.log("FINAL" + final)
+  // res.send(final)
   console.log(req.query.module)
   var module = req.query.module.toString().split(',')
   // console.log(module.length)
@@ -31,7 +58,7 @@ app.post('/', async function (req, res) {
     if (module[i] === 'speechdrop') {
       var speechdrop = require('./speechdrop.js')
       // console.log(req.body.speechdrop)
-      let speechdropLink = await speechdrop(req.body.speechdrop)
+      let speechdropLink = await speechdrop(req.body.speechdrop) //await
       // await delay();
       returnDataToMain.push(speechdropLink)
       // console.log(req.body.speechdrop)
@@ -60,20 +87,30 @@ app.post('/', async function (req, res) {
       returnDataToMain.push(oneACResults)
     }
     if (module[i] === 'scihub') {
+      console.log(`i am in the scihub func`)
+      // let sciHubModule = require('./scihub')
+      // let scihubResults =  sciHubModule(req.body.scihub)
+      // console.log("SCIHUB RESULTS" + scihubResults)
+      // returnDataToMain.push(scihubResults)
+      // .then(result => {
+      //   // returnDataToMain.push(result)
+      //   console.log(result)
+      // }).catch(err => {
+      //   console.log(`err! ${err}`)
+      // })
       let sciHubModule = require('./scihub')
       let scihubResults = await sciHubModule(req.body.scihub)
+      console.log(scihubResults)
       returnDataToMain.push(scihubResults)
+
     }
 
   }
-  // while (true) {
-  //     if (returnDataToMain.length === module.length) {
-  //         res.send(returnDataToMain)
-  //         break;
-  //     }
-  // } 
   res.send(returnDataToMain)
+
 })
+
+// })
 
 
 // port = process.env.PORT;
