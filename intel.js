@@ -13,16 +13,16 @@ const fs = require('fs');
     await page.goto(link);
     await page.waitFor(500);
 
-    // // get entries from tournament
-    // let entries = []
-    // entries = await page.evaluate(() => {
-    //     let teamsReturn = []
-    //     for (i = 1; i <= document.querySelector("#fieldsort > tbody").rows.length; i++) {
-    //         teamsReturn.push(document.querySelector(`#fieldsort > tbody > tr:nth-child(${i}) > td:nth-child(4)`).innerText + " " + document.querySelector(`#fieldsort > tbody > tr:nth-child(${i}) > td:nth-child(3)`).innerText)
-    //     }
-    // })
+    // get entries from tournament
+    let entries = []
+    entries = await page.evaluate(() => {
+        let teamsReturn = []
+        for (i = 1; i <= document.querySelector("#fieldsort > tbody").rows.length; i++) {
+            teamsReturn.push(document.querySelector(`#fieldsort > tbody > tr:nth-child(${i}) > td:nth-child(4)`).innerText + " " + document.querySelector(`#fieldsort > tbody > tr:nth-child(${i}) > td:nth-child(3)`).innerText)
+        }
+    })
 
-    // // convert into wiki links WIP
+    // convert into wiki links WIP
 
 
     if (link.includes("Aff")) { //its aff intel
