@@ -1,6 +1,6 @@
 // https://hspolicy19.debatecoaches.org/
 
-// neg working: https://hspolicy19.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Neg
+// neg working: https://hspolicy19.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%\20Neg
 // aff working: https://hspolicy19.debatecoaches.org/Archbishop%20Mitty/Patwa-Aggarwal%20Aff
 const puppeteer = require('puppeteer');
 const { search } = require('superagent');
