@@ -17,6 +17,8 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
         if (err) return console.log(err)
         console.log(`header written`)
     })
+    // var writeLine = `,,,,,,,`
+    // var writeLine = ``
     for (j = 0; j < links.length; j++) {
 
         await page.goto(links[j]);
@@ -34,27 +36,96 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
 
         // convert into wiki links WIP
 
+        // meta things:
+        // var metaThings = null;
+        var metaThings = {
+            team: "",
+            entry: "",
+            wikiEntryAffLink: ""
+        }
 
-        if (links[j].includes("Aff")) { //its aff intel
+        // metaThings = await page.evaluate((links,j) => {
+        // let metaData = {
+        //     team: "",
+        //     entry: "",
+        //     wikiEntryAffLink: ""
+        // }
+        // school name (Archbishop Mitty DA)
+        metaThings.team = links[j].substring(links[j].indexOf('https://hspolicy.debatecoaches.org/') + "https://hspolicy.debatecoaches.org/".length)
+        metaThings.team = metaThings.team.substring(0, metaThings.team.indexOf('/')).replace('%20', " ")
+
+        // entry 
+        metaThings.entry = links[j].replace(metaThings.team, "")
+        metaThings.entry = metaThings.entry.replace('Neg')
+
+        // update school with entry
+        metaThings.team = metaThings.team + " " + metaThings.entry.charAt(metaThings.entry.indexOf(0)) + metaThings.entry.charAt(metaThings.entry.indexOf("/" + 1))
+
+        // affWiki Link
+        metaThings.wikiEntryAffLink = links[j].replace('Neg', "Aff")
+
+        // return metaData
+
+        // })
+
+        // add metainfo to the csv write line
+        // writeLine += `${metaThings.team},${metaThings.entry},,${metaThings.wikiEntryAffLink}` //  next input slot is "aff"
+        console.log(metaThings)
+        // go to aff link for aff scraping
+        await page.goto(metaThings.wikiEntryAffLink)
+
+
+
+        if (metaThings.wikiEntryAffLink.includes("Aff")) { //its aff intel
+            //   aff: "",
+            // planText: ""
+
             let affReturnData = {
-                titles: [],
-                planText: []
+                aff: []
+                // planText: []
             }
             // let pageHTML = response.text().toLowerCase()
-            affReturnData.titles = await page.evaluate(() => {
+            affReturnData.aff = await page.evaluate(() => {
                 let titles = []
                 for (i = 2; i <= document.querySelector("#tblCites > tbody").rows.length; i++) {
                     titles.push(document.querySelector(`#tblCites > tbody >tr:nth-child(${i}) > td:nth-child(1) > div > h4`).innerText)
                 }
+
+                for (i = 0; i < titles.length; i++) {
+                    if (titles[i].toLowerCase().includes('contact')) {
+                        titles.splice(i, 1)
+                    }
+                }
                 return titles
             })
+
+
+            if (affReturnData.aff === [] || (affReturnData.aff[0].toLowerCase().includes('contact') && affReturnData.aff.length <= 1)) {
+                // check round reports & dump 1ac...
+                affReturnData.aff = await page.evaluate(() => {
+                    var roundReport1AC = []
+                    var eachReportArgs = null
+                    for (i = 2; i < document.querySelector("#tblReports > tbody").rows.length; i++) {
+                        eachReportArgs = document.querySelector("#tblReports > tbody >tr:nth-child(2) > td:nth-child(3) > div > div").innerText.split('\n')
+                        for (var x = 0; x < eachReportArgs.length; x++) {
+                            if (!eachReportArgs[x].toLowerCase().includes('1ac')) {
+                                eachReportArgs.splice(x, 1)
+                            } else {
+                                roundReport1AC.push(eachReportArgs[x])
+                            }
+                        }
+                    }
+                })
+            }
             console.log(affReturnData)
 
             // while (pageHTML.includes(`the united states federal government should `)) {
             //     let planText = pageHTML.indexOf(`the united states federal government should`)-1
             // }
 
-        } else if (links[j].includes('Neg')) {
+        }
+        page.goto(links[j])
+        if (links[j].includes('Neg')) {
             let negReturnData = {
                 rawList: [],
                 cp: [],
@@ -77,7 +148,7 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
             })
             console.log(negReturnData)
 
-            if (negReturnData.rawList === [] || negReturnData.rawList.length <= 1) {  // no cites, will just dump the past 1ncs 
+            if (negReturnData.rawList === [] || negReturnData.rawList.length <= 1) {  // no cites, will just dump the past 1ncs  WARNING: THIS WILL BREAK FOR 1 OFF Afropess teams... cause its <=1 fix above in the affsection
                 if (negReturnData.rawList.length === 0) {
                     negReturnData.ncDump[0] = await page.evaluate(() => {
                         let returnData = ""
@@ -220,6 +291,7 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
             maxNumberArray = maxNumberArray.sort((a, b) => a - b)
             console.log("MAX# ARRAY: " + maxNumberArray)
             var writeLine = `,,,,,,,${links[j]},`
+            // writeLine += `${links[j]},`
             console.log("I NUMBER CONDITION: " + maxNumberArray[maxNumberArray.length - 1])
             for (i = 0; i < maxNumberArray[maxNumberArray.length - 1]; i++) {
                 console.log("I" + i)
