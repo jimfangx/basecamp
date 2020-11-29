@@ -51,8 +51,9 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
         //     wikiEntryAffLink: ""
         // }
         // school name (Archbishop Mitty DA)
-        metaThings.team = links[j].substring(links[j].indexOf('https://hspolicy.debatecoaches.org/') + "https://hspolicy.debatecoaches.org/".length)
-        metaThings.team = metaThings.team.substring(0, metaThings.team.indexOf('/')).replace('%20', " ")
+        console.log(links[j])
+        metaThings.team = links[j].substring(links[j].indexOf('https://hspolicy.debatecoaches.org/') + "https://hspolicy.debatecoaches.org/".length) //'Archbishop%20Mitty/Kher-Bhadani%20Neg'
+        metaThings.team = metaThings.team.substring(0, metaThings.team.indexOf('/')).replace('%20', " ") //'Archbishop Mitty'
 
         // entry 
         metaThings.entry = links[j].replace(metaThings.team, "")
