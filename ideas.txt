@@ -9,3 +9,7 @@
  - user's own entry code?
 
  - link gui buttons to actuall requests for stuff
+
+ todo/ideas:
+ - html view for word docs - reduce lag
+ - arg percentage in intel.csv

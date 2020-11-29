@@ -5,6 +5,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const { max } = require('moment');
 const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
+const { measureMemory } = require('vm');
 
 // let link = "https://hspolicy.debatecoaches.org/Casady%20School/Burger-Fryer%20Aff"
 (async () => {
@@ -53,14 +54,18 @@ const { SSL_OP_NETSCAPE_DEMO_CIPHER_CHANGE_BUG } = require('constants');
         // school name (Archbishop Mitty DA)
         console.log(links[j])
         metaThings.team = links[j].substring(links[j].indexOf('https://hspolicy.debatecoaches.org/') + "https://hspolicy.debatecoaches.org/".length) //'Archbishop%20Mitty/Kher-Bhadani%20Neg'
-        metaThings.team = metaThings.team.substring(0, metaThings.team.indexOf('/')).replace('%20', " ") //'Archbishop Mitty'
+        metaThings.team = metaThings.team.substring(0, metaThings.team.indexOf('/')).replace(/%20/g, " ").trim() //'Archbishop Mitty'
 
         // entry 
-        metaThings.entry = links[j].replace(metaThings.team, "")
-        metaThings.entry = metaThings.entry.replace('Neg')
+        metaThings.entry = links[j].substring(links[j].indexOf(metaThings.team.replace(/ /g, "%20")) + metaThings.team.replace(/ /g, "%20").length)
+        metaThings.entry = metaThings.entry.replace('Neg', "")
+        metaThings.entry = metaThings.entry.replace(/%20/g, " ")
+        metaThings.entry = metaThings.entry.replace(/\//g, " ")
+        metaThings.entry = metaThings.entry.trim()
 
         // update school with entry
         metaThings.team = metaThings.team + " " + metaThings.entry.charAt(metaThings.entry.indexOf(0)) + metaThings.entry.charAt(metaThings.entry.indexOf("/" + 1))
+        metaThings.team = metaThings.team.trim()
 
         // affWiki Link
         metaThings.wikiEntryAffLink = links[j].replace('Neg', "Aff")
