@@ -438,6 +438,29 @@ ipcMain.on('scihubInputjsindexjsValue', async (event, data) => { // after data i
     mainWindow.webContents.send('scihubInputIndexjsMainjs', data)
 })
 
+// general input
+ipcMain.on('mainjsIndexjsForInput', async (event, data) => { //from main.js to open input window
+    linkWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+    linkWindow.loadFile('input.html')
+    linkWindow.webContents.on(('did-finish-load'), function() {
+        linkWindow.webContents.send('moduleNotification', data) // send the selected module that is passed from main.js to input.js so it can be returned along with the user input
+    })
+
+    console.log('moduleNotification sent')
+    linkWindow.show()
+})
+ipcMain.on('InputjsindexjsValue', async (event, data)=> {
+    console.log("received! Input" + data)
+    linkWindow.close()
+    mainWindow.webContents.send(`${data[data.length-1]}InputIndexjsMainjs`, data)
+})
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

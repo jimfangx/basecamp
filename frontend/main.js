@@ -70,7 +70,8 @@ ipcRenderer.on('tabAuthDataReturnIndexjsMainjs', (event, message) => {
 // manual processing
 $('.2nrSearch').on('click', function () {
 
-    ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow')
+    // ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow', 'wiki')
+    ipcRenderer.send('mainjsIndexjsForInput', 'wiki')
 
     ipcRenderer.on('wikiInputIndexjsMainjs', (event, message) => {
         var modules = `judge`
@@ -95,32 +96,33 @@ $('.2nrSearch').on('click', function () {
 })
 
 
-$('.1acSearch').on('click', function () {
-    ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow')
+// $('.1acSearch').on('click', function () {
+//     ipcRenderer.send('mainjsIndexjsForWikiInputOpenWindow', 'wiki')
 
-    ipcRenderer.on('wikiInputIndexjsMainjs', (event, message) => {
-        var modules = `judge`
-        var settings = {
-            "url": `http://localhost:8080/?module=${modules}`,
-            "method": "POST",
-            "timeout": 0,
-            "headers": {
-                "Content-Type": "application/x-www-form-urlencoded"
-            },
-            "data": {
-                "wiki": `${message}`
-            }
-        };
+//     ipcRenderer.on('wikiInputIndexjsMainjs', (event, message) => {
+//         var modules = `judge`
+//         var settings = {
+//             "url": `http://localhost:8080/?module=${modules}`,
+//             "method": "POST",
+//             "timeout": 0,
+//             "headers": {
+//                 "Content-Type": "application/x-www-form-urlencoded"
+//             },
+//             "data": {
+//                 "wiki": `${message}`
+//             }
+//         };
 
-        $.ajax(settings).done(function (response) {
-            console.log(response);
-        });
+//         $.ajax(settings).done(function (response) {
+//             console.log(response);
+//         });
 
-    })
-})
+//     })
+// })
 
 $('.judge').on('click', function () {
-    ipcRenderer.send('mainjsIndexjsForJudgeInputOpenWindow')
+    // ipcRenderer.send('mainjsIndexjsForJudgeInputOpenWindow', 'judge')
+    ipcRenderer.send('mainjsIndexjsForInput', 'judge')
     ipcRenderer.on('judgeInputIndexjsMainjs', (event, message) => {
         var modules = `judge`
         var settings = {
@@ -142,7 +144,8 @@ $('.judge').on('click', function () {
 })
 
 $('.speechdrop').on('click', function () {
-    ipcRenderer.send('mainjsIndexjsForSpeechdrop')
+    // ipcRenderer.send('mainjsIndexjsForSpeechdrop', 'speechdrop')
+    ipcRenderer.send('mainjsIndexjsForInput', 'speechdrop')
     ipcRenderer.on('speechdropInputIndexjsMainjs', (event, message) => {
         var modules = `speechdrop`
         var settings = {
@@ -164,7 +167,8 @@ $('.speechdrop').on('click', function () {
 })
 
 $('.scihub').on('click', function () {
-    ipcRenderer.send('mainjsIndexjsForScihub')
+    // ipcRenderer.send('mainjsIndexjsForScihub')
+    ipcRenderer.send('mainjsIndexjsForInput', 'scihub')
     ipcRenderer.on('scihubInputIndexjsMainjs', (event, message) => {
         var modules = `scihub`
         var settings = {
@@ -175,7 +179,7 @@ $('.scihub').on('click', function () {
                 "Content-Type": "application/x-www-form-urlencoded"
             },
             "data": {
-                "scihub": `${message}`
+                "scihub": `${message[0]}`
             }
         };
 
