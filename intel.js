@@ -19,13 +19,16 @@ const { measureMemory } = require('vm');
         console.log(`header written`)
     })
     // var writeLine = `,,,,,,,`
-    // var writeLine = ``
+    var writeLine = ``
+    var affIntel = false; // check if there was aff intel, if not run the normal neg loop
+    var newSchool = false; // check if there was meta school stuff
     for (j = 0; j < links.length; j++) {
 
         await page.goto(links[j]);
         await page.waitFor(500);
         await page.addScriptTag({ url: 'https://code.jquery.com/jquery-3.2.1.min.js' })
 
+        writeLine = ``
         // // get entries from tournament // this is TABROOM
         // let entries = []
         // entries = await page.evaluate(() => {
@@ -75,8 +78,9 @@ const { measureMemory } = require('vm');
         // })
 
         // add metainfo to the csv write line
-        // writeLine += `${metaThings.team},${metaThings.entry},,${metaThings.wikiEntryAffLink}` //  next input slot is "aff"
+        writeLine += `${metaThings.team},${metaThings.entry},,${metaThings.wikiEntryAffLink},` //  next input slot is "aff"
         console.log(metaThings)
+        newSchool = true;
         // go to aff link for aff scraping
         await page.goto(metaThings.wikiEntryAffLink)
 
@@ -128,9 +132,12 @@ const { measureMemory } = require('vm');
             // while (pageHTML.includes(`the united states federal government should `)) {
             //     let planText = pageHTML.indexOf(`the united states federal government should`)-1
             // }
-
+            console.log(affReturnData.aff.join('| '))
+            writeLine+=`${affReturnData.aff.join('| ')}, , ,` // this line has issues - writes each individual aff as a different cell
+            affIntel = true;
         }
-        page.goto(links[j])
+
+        await page.goto(links[j])
         if (links[j].includes('Neg')) {
             let negReturnData = {
                 rawList: [],
@@ -295,9 +302,17 @@ const { measureMemory } = require('vm');
             // find max number
             let maxNumberArray = [parseInt(negReturnData.cp.length), parseInt(negReturnData.da.length), parseInt(negReturnData.it.length), parseInt(negReturnData.k.length), parseInt(negReturnData.p.length), parseInt(negReturnData.t.length), parseInt(negReturnData.ncDump.length)]
             maxNumberArray = maxNumberArray.sort((a, b) => a - b)
+            // if (maxNumberArray[maxNumberArray.length-1] == 0 && affReturnData.aff)
+            if (maxNumberArray[maxNumberArray.length-1] == 0 && affIntel) {
+                maxNumberArray.push(1)
+            }
             console.log("MAX# ARRAY: " + maxNumberArray)
-            var writeLine = `,,,,,,,${links[j]},`
-            // writeLine += `${links[j]},`
+            if (newSchool && affIntel) {
+                writeLine += `${links[j]},`
+            }
+            else {
+                writeLine = `,,,,,,,${links[j]},`
+            }
             console.log("I NUMBER CONDITION: " + maxNumberArray[maxNumberArray.length - 1])
             for (i = 0; i < maxNumberArray[maxNumberArray.length - 1]; i++) {
                 console.log("I" + i)
@@ -351,7 +366,10 @@ const { measureMemory } = require('vm');
                 // }
                 await page.waitFor(500)
                 console.log("NEGRETURNNCDUMPLENGHT" + negReturnData.ncDump.length)
-                if (negReturnData.ncDump.length === 0) {
+                if (maxNumberArray[maxNumberArray.length-2] == 0 && affIntel) {
+                    writeLine+=`,,,,,,,,,,\n`
+                }
+                else if (negReturnData.ncDump.length === 0) {
                     // writeLine += `,,,,\n`
                     writeLine += ",,,,\n"
                     console.log("TRATIDONAL")
@@ -363,6 +381,9 @@ const { measureMemory } = require('vm');
                     if (err) return console.log(err)
                     console.log(`intel written: ${writeLine}`)
                     writeLine = `,,,,,,,,`
+                    newSchool = false
+                    affIntel = false
+                    // writeLine = ``
                 })
             }
             // // idk if we need duplicate detection lol
