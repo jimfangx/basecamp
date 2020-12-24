@@ -110,7 +110,7 @@ const { measureMemory } = require('vm');
             })
 
 
-            if (affReturnData.aff === [] || (affReturnData.aff[0].toLowerCase().includes('contact') && affReturnData.aff.length <= 1)) {
+            if (affReturnData.aff === [] || (affReturnData.aff.length === 1 && affReturnData.aff[0].toLowerCase().includes('contact'))) {
                 // check round reports & dump 1ac...
                 affReturnData.aff = await page.evaluate(() => {
                     var roundReport1AC = []
