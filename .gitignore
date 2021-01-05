@@ -6,3 +6,7 @@ frontend/config.json
 node_modules/
 
 frontend/auth.json
+
+frontend/release-builds/
+
+frontend/tabCred.json
