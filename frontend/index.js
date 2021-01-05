@@ -1,8 +1,10 @@
 const { rejects } = require('assert');
+const { exception } = require('console');
 const { promises } = require('dns');
 const electron = require('electron')
 const { app, BrowserWindow, ipcMain, Menu, ClientRequest, session, powerSaveBlocker, globalShortcut } = electron;
-const fs = require('fs')
+const fs = require('fs');
+const { attachCookies } = require('superagent');
 const superagent = require('superagent');
 const config = require('./config.json')
 
@@ -39,21 +41,53 @@ app.whenReady().then(() => {
 });
 
 ipcMain.on('tabroomAuthorization', (event) => { // tabroom authorization
-    authWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        show: false,
-        webPreferences: {
-            nodeIntegration: true
-        }
-    });
-    authWindow.loadFile('tabLink.html')
-    authWindow.show()
+    // see if user has auth-ed before - if they have, skip login window
+    let authCredentials = null;
+    // fs.readFile('./auth.json', (err, data) => {
+    //     console.log(data)
+    //     if (data === "") {
+    //         console.log(`in auth window`)
+    //         authWindow = new BrowserWindow({
+    //             width: 800,
+    //             height: 600,
+    //             show: false,
+    //             webPreferences: {
+    //                 nodeIntegration: true
+    //             }
+    //         });
+    //         authWindow.loadFile('tabLink.html')
+    //         authWindow.show()
+    //     } else {
+            authCredentials = require('./auth.json')
+            superagent
+                .get('https://tabroomapi.herokuapp.com/me/test')
+                .set('Content-Type', 'application/x-www-form-urlencoded')
+                .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
+                .end((err, res) => {
+                    console.log(res.statusCode)
+                    if (res.statusCode === 403) {
+                        console.log(`in auth window`)
+                        authWindow = new BrowserWindow({
+                            width: 800,
+                            height: 600,
+                            show: false,
+                            webPreferences: {
+                                nodeIntegration: true
+                            }
+                        });
+                        authWindow.loadFile('tabLink.html')
+                        authWindow.show()
+                    } else if (res.statusCode === 200) {
+                        mainWindow.webContents.send('tabroomAuthSuccessful')
+                    }
+                })
+        // }
+    // })
 })
 
 ipcMain.on('tabroomAuthorizationCredentials', async (event, data) => {
     console.log('received!')
-    // console.log(data)
+    console.log(data)
 
     authWindow.close()
 
@@ -64,7 +98,7 @@ ipcMain.on('tabroomAuthorizationCredentials', async (event, data) => {
         fs.writeFile('./auth.json', JSON.stringify(token), function (err) {
             if (err) return console.log(err)
             console.log(`written`)
-            mainWindow.webContents.send('tabroomAuthSuccessful', token)
+            mainWindow.webContents.send('tabroomAuthSuccessful')
         })
     }
 
@@ -76,7 +110,6 @@ ipcMain.on('tabroomAuthorizationCredentials', async (event, data) => {
                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "username":"${data[0]}", "password":"${data[1]}"}`))
                 .end((err, res) => {
                     resolve(res.body)
-                    console.log('test')
                 })
         })
     }
@@ -103,6 +136,10 @@ ipcMain.on('userInfoWindowOpen', (event, data) => {
     userinfoWindow.webContents.on('did-finish-load', function () {
         userinfoWindow.webContents.send('userInfoLoadData', data)
     })
+})
+
+ipcMain.on('closeApplication', (event) => {
+    app.exit(0)
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common

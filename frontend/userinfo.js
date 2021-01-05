@@ -1,5 +1,6 @@
 const electron = require('electron')
 const { ipcRenderer } = electron;
+const fs = require('fs')
 
 ipcRenderer.on('userInfoLoadData', (event, data) => {
     console.log(data)
@@ -13,4 +14,11 @@ ipcRenderer.on('userInfoLoadData', (event, data) => {
     $('#nsdaHonor').html(`<a class="fs-6 text-muted" style="text-decoration: none;">Latest NSDA Honor:</a> ${data.latestNsdaHonor}`)
     $('#nsdaHonorDate').html(`<a class="fs-6 text-muted" style="text-decoration: none;">Latest NSDA Honor Date:</a> ${data.latestNsdaHonorDate}`)
     $('#nsdaAffiliation').html(`<a class="fs-6 text-muted" style="text-decoration: none;">Affiliation:</a> ${data.nsdaAffiliation}`)
+})
+
+$('#logoutBtn').on('click', async function () {
+    fs.writeFileSync('./auth.json', JSON.stringify(`{"token":"", "expiration":""}`), function (err) {
+        if (err) console.log(err)
+    })
+    ipcRenderer.send('closeApplication')
 })
