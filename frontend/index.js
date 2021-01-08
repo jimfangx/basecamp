@@ -58,6 +58,22 @@ ipcMain.on('tabroomAuthorization', (event) => { // tabroom authorization
     //         authWindow.loadFile('tabLink.html')
     //         authWindow.show()
     //     } else {
+    fs.access('./auth.json', fs.F_OK, (err) => {
+        if (err) {
+            console.log(`in auth window`)
+            authWindow = new BrowserWindow({
+                width: 800,
+                height: 600,
+                show: false,
+                webPreferences: {
+                    nodeIntegration: true
+                }
+            });
+            authWindow.loadFile('tabLink.html')
+            authWindow.show()
+        } else {
+
+            //file exists
             authCredentials = require('./auth.json')
             superagent
                 .get('https://tabroomapi.herokuapp.com/me/test')
@@ -81,7 +97,9 @@ ipcMain.on('tabroomAuthorization', (event) => { // tabroom authorization
                         mainWindow.webContents.send('tabroomAuthSuccessful')
                     }
                 })
-        // }
+        }
+    })
+    // }
     // })
 })
 

@@ -82,6 +82,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     $('#info').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Info:</a> ${res.body[earlistElementNumber].info}`)
                                     $('#notes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Notes:</a> ${res.body[earlistElementNumber].notes}`)
 
+                                    $('#refreshActiveRoundsSingle').css('visibility', '')
                                     console.log(res.body[earlistElementNumber])
 
                                 }
@@ -90,17 +91,74 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                             })
                     } else if (res.statusCode == 200) { // there is a current round active (update the front page info)
 
+                        var dateArray = []
+                        var earlistElementNumber = 0
+                        for (i = 1; i < res.body.length; i++) { // start from 1 cause first elemeent is basic info
+                            dateArray.push(res.body[i].startTimeUnix)
+                        }
+                        dateArray.sort((a, b) => a - b)
+                        for (i = 0; i < dateArray.length; i++) {
+                            if (Date.now() > dateArray[i]) {
+                                dateArray = dateArray.slice(1)
+                            }
+                        }
+                        for (i = 1; i < res.body.length; i++) {
+                            if (res.body[i].startTimeUnix === dateArray[0]) {
+                                earlistElementNumber = i
+                            }
+                        }
+
                         $('#mainTag').text(``).css('margin-top', "0%")
-                        $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[1].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
-                        $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[1].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[1].judge}</a>`)
-                        $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[1].room}`)
+                        $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
+                        $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
+                        $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room}`)
                         var todayDate = new Date()
                         todayDate = todayDate.toDateString()
 
-                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${todayDate} ${res.body[1].startTime}`)
-                        $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[1].roundNum}`)
-                        $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} ${res.body[0].event}`)
+                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                        $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
+                        $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
 
+                        $('#dashboardOpenBtn').css('visibility', '')
+                        $('#refreshActiveRounds').css('visibility', '')
+
+                        $('#refreshActiveRounds').on('click', function () {
+                            superagent
+                                .get('https://tabroomapi.herokuapp.com/me/current')
+                                // .get('http://localhost:8080/me/current') // Forcing active round by loading a html file of an active round
+                                .set('Content-Type', 'application/x-www-form-urlencoded')
+                                .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
+                                .end((err, res) => {
+                                    console.log('refereshed')
+                                    var dateArray = []
+                                    var earlistElementNumber = 0
+                                    for (i = 1; i < res.body.length; i++) { // start from 1 cause first elemeent is basic info
+                                        dateArray.push(res.body[i].startTimeUnix)
+                                    }
+                                    dateArray.sort((a, b) => a - b)
+                                    for (i = 0; i < dateArray.length; i++) {
+                                        if (Date.now() > dateArray[i]) {
+                                            dateArray = dateArray.slice(1)
+                                        }
+                                    }
+                                    for (i = 1; i < res.body.length; i++) {
+                                        if (res.body[i].startTimeUnix === dateArray[0]) {
+                                            earlistElementNumber = i
+                                        }
+                                    }
+
+                                    $('#mainTag').text(``).css('margin-top', "0%")
+                                    $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
+                                    $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
+                                    $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room}`)
+                                    var todayDate = new Date()
+                                    todayDate = todayDate.toDateString()
+
+                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                                    $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
+                                    $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
+                                })
+                        })
                     }
 
                 })
