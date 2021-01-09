@@ -65,7 +65,11 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                         dateArray.push(Date.parse(res.body[i].date))
                                     }
                                     dateArray.sort((a, b) => a - b)
-
+                                    for (i = 0; i < dateArray.length; i++) {
+                                        if ((Date.now() - (2.5*60*60*1000)) > dateArray[i]) { // add 2 hours so that it still displays in round
+                                            dateArray = dateArray.slice(1)
+                                        }
+                                    }
                                     for (i = 0; i < res.body.length; i++) {
                                         if (dateArray[0] === Date.parse(res.body[i].date)) {
                                             earlistElementNumber = i
@@ -98,10 +102,11 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         }
                         dateArray.sort((a, b) => a - b)
                         for (i = 0; i < dateArray.length; i++) {
-                            if (Date.now() > dateArray[i]) {
+                            if (((Date.now() - (2*60*60*1000)) > dateArray[i]) && dateArray.length>1) { // add 2 hours so that it still displays in round
                                 dateArray = dateArray.slice(1)
                             }
                         }
+                        console.log(dateArray)
                         for (i = 1; i < res.body.length; i++) {
                             if (res.body[i].startTimeUnix === dateArray[0]) {
                                 earlistElementNumber = i
@@ -115,7 +120,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         var todayDate = new Date()
                         todayDate = todayDate.toDateString()
 
-                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
                         $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
                         $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
 
@@ -137,7 +142,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     }
                                     dateArray.sort((a, b) => a - b)
                                     for (i = 0; i < dateArray.length; i++) {
-                                        if (Date.now() > dateArray[i]) {
+                                        if ( ((Date.now() - (2*60*60*1000)) > dateArray[i]) && dateArray.length>1) {
                                             dateArray = dateArray.slice(1)
                                         }
                                     }
@@ -154,10 +159,14 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     var todayDate = new Date()
                                     todayDate = todayDate.toDateString()
 
-                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
                                     $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
                                     $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
                                 })
+                        })
+
+                        $('#dashboardOpenBtn').on('click', function() {
+                            ipcRenderer.send('inRoundDashboardOpen')
                         })
                     }
 

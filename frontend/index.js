@@ -11,7 +11,7 @@ const config = require('./config.json')
 
 let mainWindow;
 let authWindow;
-let tournamentStartWindow; // 1 key perform all calcs when new pairings go live
+let inRoundDashboard; // 1 key perform all calcs when new pairings go live
 let inputWindow; // input for the individual functions not used during a tournament start
 let userinfoWindow; // userinfo window (when clicked on the logged in name)
 
@@ -156,9 +156,27 @@ ipcMain.on('userInfoWindowOpen', (event, data) => {
     })
 })
 
+ipcMain.on('inRoundDashboardOpen', (event) => {
+    console.log('open in round dashboard')
+
+    inRoundDashboard = new BrowserWindow({
+        width: 400,
+        height: 500,
+        show: false,
+        webPreferences: {
+            nodeIntegration: true
+        }
+    });
+
+    inRoundDashboard.maximize()
+    inRoundDashboard.loadFile('dashboard.html')
+    inRoundDashboard.show()
+})
+
 ipcMain.on('closeApplication', (event) => {
     app.exit(0)
 })
+
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
