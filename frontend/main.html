@@ -108,14 +108,33 @@
 
     <h3 class="text-center" id="tournamentName"></h3>
     <h3 class="text-center" id="date"></h3>
-    <h4 class="text-center" id="event"></h4> 
+    <h4 class="text-center" id="event"></h4>
     <h5 class="text-center" id="location"></h5>
     <h5 class="text-center" id="status"></h5>
     <h5 class="text-center" id="prefs"></h5>
     <h6 class="text-center" id="info"></h6>
     <h6 class="text-center" id="notes"></h6>
 
-    <button type="button" class="btn btn-success" style="visibility: hidden;">Launch In-Round Dashboard</button>
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <button type="button" class="btn btn-success" style="visibility: hidden;" id="dashboardOpenBtn">Round
+                    Detected:
+                    Open Dashboard</button>
+                <button type="button" class="btn btn-info" style="visibility: hidden;" id="refreshActiveRounds">Refresh
+                    Round Information</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col text-center">
+                <button type="button" class="btn btn-info" style="visibility: hidden;"
+                    id="refreshActiveRoundsSingle">Refresh Round Information</button>
+            </div>
+        </div>
+    </div>
 
     <script src="./main.js"></script>
 </body>

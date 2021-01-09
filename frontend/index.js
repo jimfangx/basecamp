@@ -156,7 +156,7 @@ ipcMain.on('userInfoWindowOpen', (event, data) => {
     })
 })
 
-ipcMain.on('inRoundDashboardOpen', (event) => {
+ipcMain.on('inRoundDashboardOpen', (event, data) => {
     console.log('open in round dashboard')
 
     inRoundDashboard = new BrowserWindow({
@@ -171,6 +171,10 @@ ipcMain.on('inRoundDashboardOpen', (event) => {
     inRoundDashboard.maximize()
     inRoundDashboard.loadFile('dashboard.html')
     inRoundDashboard.show()
+
+    inRoundDashboard.webContents.on('did-finish-load', function () {
+        inRoundDashboard.webContents.send('currentRoundData', data)
+    })
 })
 
 ipcMain.on('closeApplication', (event) => {

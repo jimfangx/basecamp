@@ -65,11 +65,11 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                         dateArray.push(Date.parse(res.body[i].date))
                                     }
                                     dateArray.sort((a, b) => a - b)
-                                    for (i = 0; i < dateArray.length; i++) {
-                                        if ((Date.now() - (2.5*60*60*1000)) > dateArray[i]) { // add 2 hours so that it still displays in round
-                                            dateArray = dateArray.slice(1)
-                                        }
-                                    }
+                                    // for (i = 0; i < dateArray.length; i++) {
+                                    //     if ((Date.now() - (2.5*60*60*1000)) > dateArray[i]) { // add 2 hours so that it still displays in round
+                                    //         dateArray = dateArray.slice(1)
+                                    //     }
+                                    // }
                                     for (i = 0; i < res.body.length; i++) {
                                         if (dateArray[0] === Date.parse(res.body[i].date)) {
                                             earlistElementNumber = i
@@ -102,7 +102,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         }
                         dateArray.sort((a, b) => a - b)
                         for (i = 0; i < dateArray.length; i++) {
-                            if (((Date.now() - (2*60*60*1000)) > dateArray[i]) && dateArray.length>1) { // add 2 hours so that it still displays in round
+                            if (((Date.now() - (2*60*60*1000)) < dateArray[i]) && dateArray.length>1) { // add 2 hours so that it still displays in round
                                 dateArray = dateArray.slice(1)
                             }
                         }
@@ -142,7 +142,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     }
                                     dateArray.sort((a, b) => a - b)
                                     for (i = 0; i < dateArray.length; i++) {
-                                        if ( ((Date.now() - (2*60*60*1000)) > dateArray[i]) && dateArray.length>1) {
+                                        if ( ((Date.now() - (2*60*60*1000)) < dateArray[i]) && dateArray.length>1) {
                                             dateArray = dateArray.slice(1)
                                         }
                                     }
@@ -166,7 +166,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         })
 
                         $('#dashboardOpenBtn').on('click', function() {
-                            ipcRenderer.send('inRoundDashboardOpen')
+                            ipcRenderer.send('inRoundDashboardOpen', res.body[earlistElementNumber])
                         })
                     }
 
