@@ -101,12 +101,14 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                             dateArray.push(res.body[i].startTimeUnix)
                         }
                         dateArray.sort((a, b) => a - b)
+
                         for (i = 0; i < dateArray.length; i++) {
-                            if (((Date.now() - (2*60*60*1000)) < dateArray[i]) && dateArray.length>1) { // add 2 hours so that it still displays in round
+                            if (((Date.now() - (2 * 60 * 60 * 1000)) > dateArray[i]) && dateArray.length > 1) { // add 2 hours so that it still displays in round
                                 dateArray = dateArray.slice(1)
+                                i--;
                             }
                         }
-                        console.log(dateArray)
+
                         for (i = 1; i < res.body.length; i++) {
                             if (res.body[i].startTimeUnix === dateArray[0]) {
                                 earlistElementNumber = i
@@ -116,11 +118,19 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         $('#mainTag').text(``).css('margin-top', "0%")
                         $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
                         $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
-                        $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room}`)
-                        var todayDate = new Date()
-                        todayDate = todayDate.toDateString()
+                        $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room === '' ? 'No Room' : res.body[earlistElementNumber].room}`)
+                        var roundDate = new Date(res.body[earlistElementNumber].startTimeUnix)
+                        dateReplaceFilter = {
+                            0: 'Sun',
+                            1: 'Mon',
+                            2: 'Tue',
+                            3: "Wed",
+                            4: "Thu",
+                            5: "Fri",
+                            6: "Sat"
+                        }
 
-                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
                         $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
                         $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
 
@@ -141,10 +151,16 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                         dateArray.push(res.body[i].startTimeUnix)
                                     }
                                     dateArray.sort((a, b) => a - b)
+
+
                                     for (i = 0; i < dateArray.length; i++) {
-                                        if ( ((Date.now() - (2*60*60*1000)) < dateArray[i]) && dateArray.length>1) {
+
+                                        if (((Date.now() - (2 * 60 * 60 * 1000)) > dateArray[i]) && dateArray.length > 1) {
+
                                             dateArray = dateArray.slice(1)
+                                            i--;
                                         }
+
                                     }
                                     for (i = 1; i < res.body.length; i++) {
                                         if (res.body[i].startTimeUnix === dateArray[0]) {
@@ -155,17 +171,25 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     $('#mainTag').text(``).css('margin-top', "0%")
                                     $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
                                     $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
-                                    $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room}`)
-                                    var todayDate = new Date()
-                                    todayDate = todayDate.toDateString()
+                                    $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room === '' ? 'No Room' : res.body[earlistElementNumber].room}`)
+                                    var roundDate = new Date(res.body[earlistElementNumber].startTimeUnix)
+                                    dateReplaceFilter = {
+                                        0: 'Sun',
+                                        1: 'Mon',
+                                        2: 'Tue',
+                                        3: "Wed",
+                                        4: "Thu",
+                                        5: "Fri",
+                                        6: "Sat"
+                                    }
 
-                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${todayDate} ${res.body[earlistElementNumber].startTime}`)
+                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
                                     $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
                                     $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
                                 })
                         })
 
-                        $('#dashboardOpenBtn').on('click', function() {
+                        $('#dashboardOpenBtn').on('click', function () {
                             ipcRenderer.send('inRoundDashboardOpen', res.body[earlistElementNumber])
                         })
                     }
