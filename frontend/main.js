@@ -86,7 +86,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     $('#info').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Info:</a> ${res.body[earlistElementNumber].info}`)
                                     $('#notes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Notes:</a> ${res.body[earlistElementNumber].notes}`)
 
-                                    $('#refreshActiveRoundsSingle').css('visibility', '')
+                                    $('#refreshActiveRoundsSingle').css('visibility', '') // NOTE: Either add a general refresh btn and add an action to refresh or remove this
                                     console.log(res.body[earlistElementNumber])
 
                                 } else { // chnage this into else if statuscode === 204
@@ -139,7 +139,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                         $('#dashboardOpenBtn').css('visibility', '')
                         $('#refreshActiveRounds').css('visibility', '')
 
-                        $('#refreshActiveRounds').on('click', function () {
+                        $('#refreshActiveRounds').on('click', function () { // refresh rounds btn
                             superagent
                                 .get('https://tabroomapi.herokuapp.com/me/current')
                                 // .get('http://localhost:8080/me/current') // Forcing active round by loading a html file of an active round
@@ -189,7 +189,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                         $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
                                         $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
                                         $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
-                                    } else {
+                                    } else { // if no more rounds & tournament ended (so no display in "current" tab)
                                         superagent
                                             .get('https://tabroomapi.herokuapp.com/me/future')
                                             .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -224,14 +224,12 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                                     $('#info').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Info:</a> ${res.body[earlistElementNumber].info}`)
                                                     $('#notes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Notes:</a> ${res.body[earlistElementNumber].notes}`)
 
-                                                    $('#refreshActiveRoundsSingle').css('visibility', '')
+                                                    $('#refreshActiveRoundsSingle').css('visibility', '') // NOTE: Either add a general refresh btn and add an action to refresh or remove this
                                                     console.log(res.body[earlistElementNumber])
 
-                                                } else { // chnage this into else if statuscode === 204
+                                                } else { // chnage this into else if statuscode === 204 -> means not at tournament & no future tourns scheduled
                                                     $('#mainTag').text(`No Upcoming Tournaments`)
                                                 }
-                                                // currently working on the now tournaments thing in the api
-                                                // need xwiki api too
                                             })
                                     }
                                 })
