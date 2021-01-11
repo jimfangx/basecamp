@@ -89,6 +89,8 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                     $('#refreshActiveRoundsSingle').css('visibility', '')
                                     console.log(res.body[earlistElementNumber])
 
+                                } else { // chnage this into else if statuscode === 204
+                                    $('#mainTag').text(`No Upcoming Tournaments`)
                                 }
                                 // currently working on the now tournaments thing in the api
                                 // need xwiki api too
@@ -144,48 +146,94 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                 .set('Content-Type', 'application/x-www-form-urlencoded')
                                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
                                 .end((err, res) => {
-                                    console.log('refereshed')
-                                    var dateArray = []
-                                    var earlistElementNumber = 0
-                                    for (i = 1; i < res.body.length; i++) { // start from 1 cause first elemeent is basic info
-                                        dateArray.push(res.body[i].startTimeUnix)
-                                    }
-                                    dateArray.sort((a, b) => a - b)
+                                    if (res.statusCode === 200) {
+                                        console.log('refereshed')
+                                        var dateArray = []
+                                        var earlistElementNumber = 0
+                                        for (i = 1; i < res.body.length; i++) { // start from 1 cause first elemeent is basic info
+                                            dateArray.push(res.body[i].startTimeUnix)
+                                        }
+                                        dateArray.sort((a, b) => a - b)
 
 
-                                    for (i = 0; i < dateArray.length; i++) {
+                                        for (i = 0; i < dateArray.length; i++) {
 
-                                        if (((Date.now() - (2 * 60 * 60 * 1000)) > dateArray[i]) && dateArray.length > 1) {
+                                            if (((Date.now() - (2 * 60 * 60 * 1000)) > dateArray[i]) && dateArray.length > 1) {
 
-                                            dateArray = dateArray.slice(1)
-                                            i--;
+                                                dateArray = dateArray.slice(1)
+                                                i--;
+                                            }
+
+                                        }
+                                        for (i = 1; i < res.body.length; i++) {
+                                            if (res.body[i].startTimeUnix === dateArray[0]) {
+                                                earlistElementNumber = i
+                                            }
                                         }
 
-                                    }
-                                    for (i = 1; i < res.body.length; i++) {
-                                        if (res.body[i].startTimeUnix === dateArray[0]) {
-                                            earlistElementNumber = i
+                                        $('#mainTag').text(``).css('margin-top', "0%")
+                                        $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
+                                        $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
+                                        $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room === '' ? 'No Room' : res.body[earlistElementNumber].room}`)
+                                        var roundDate = new Date(res.body[earlistElementNumber].startTimeUnix)
+                                        dateReplaceFilter = {
+                                            0: 'Sun',
+                                            1: 'Mon',
+                                            2: 'Tue',
+                                            3: "Wed",
+                                            4: "Thu",
+                                            5: "Fri",
+                                            6: "Sat"
                                         }
-                                    }
 
-                                    $('#mainTag').text(``).css('margin-top', "0%")
-                                    $('#oppoent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Oppoent:</a> ${res.body[earlistElementNumber].oppoent}`) // [1] becuase [0] is the tournament info, [1] is the info of the first round
-                                    $('#judge').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Judge:</a> <a href="${res.body[earlistElementNumber].paradigmLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].judge}</a>`)
-                                    $('#room').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Room:</a> ${res.body[earlistElementNumber].room === '' ? 'No Room' : res.body[earlistElementNumber].room}`)
-                                    var roundDate = new Date(res.body[earlistElementNumber].startTimeUnix)
-                                    dateReplaceFilter = {
-                                        0: 'Sun',
-                                        1: 'Mon',
-                                        2: 'Tue',
-                                        3: "Wed",
-                                        4: "Thu",
-                                        5: "Fri",
-                                        6: "Sat"
-                                    }
+                                        $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
+                                        $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
+                                        $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
+                                    } else {
+                                        superagent
+                                            .get('https://tabroomapi.herokuapp.com/me/future')
+                                            .set('Content-Type', 'application/x-www-form-urlencoded')
+                                            .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
+                                            .end((err, res) => {
 
-                                    $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
-                                    $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
-                                    $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
+                                                if (res.statusCode == 200) { // user has a future entry
+                                                    var dateArray = []
+                                                    var earlistElementNumber = 0
+                                                    for (i = 0; i < res.body.length; i++) {
+                                                        dateArray.push(Date.parse(res.body[i].date))
+                                                    }
+                                                    dateArray.sort((a, b) => a - b)
+                                                    // for (i = 0; i < dateArray.length; i++) {
+                                                    //     if ((Date.now() - (2.5*60*60*1000)) > dateArray[i]) { // add 2 hours so that it still displays in round
+                                                    //         dateArray = dateArray.slice(1)
+                                                    //     }
+                                                    // }
+                                                    for (i = 0; i < res.body.length; i++) {
+                                                        if (dateArray[0] === Date.parse(res.body[i].date)) {
+                                                            earlistElementNumber = i
+                                                        }
+                                                    }
+
+                                                    $('#mainTag').text(``).css('margin-top', "0%")
+                                                    $('#tournamentName').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Tournament:</a> ${res.body[earlistElementNumber].name}`)
+                                                    $('#date').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${res.body[earlistElementNumber].date}`)
+                                                    $('#event').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Division:</a> <a href="${res.body[earlistElementNumber].eventLink}" target="_blank" style="text-decoration: underline; color:black"">${res.body[earlistElementNumber].event}</a>`)
+                                                    $('#location').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Location:</a> ${res.body[earlistElementNumber].location}`)
+                                                    $('#status').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Status:</a> ${res.body[earlistElementNumber].status}`)
+                                                    $('#prefs').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Pref Info:</a> ${res.body[earlistElementNumber].prefs}`)
+                                                    $('#info').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Info:</a> ${res.body[earlistElementNumber].info}`)
+                                                    $('#notes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Additional Notes:</a> ${res.body[earlistElementNumber].notes}`)
+
+                                                    $('#refreshActiveRoundsSingle').css('visibility', '')
+                                                    console.log(res.body[earlistElementNumber])
+
+                                                } else { // chnage this into else if statuscode === 204
+                                                    $('#mainTag').text(`No Upcoming Tournaments`)
+                                                }
+                                                // currently working on the now tournaments thing in the api
+                                                // need xwiki api too
+                                            })
+                                    }
                                 })
                         })
 

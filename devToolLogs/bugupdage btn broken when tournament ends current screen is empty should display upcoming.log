@@ -1,0 +1,57 @@
+electron/js2c/renderer_init.js:111 Electron Security Warning (Insecure Content-Security-Policy) This renderer process has either no Content Security
+    Policy set or a policy with "unsafe-eval" enabled. This exposes users of
+    this app to unnecessary security risks.
+
+For more information and help, consult
+https://electronjs.org/docs/tutorial/security.
+This warning will not show up
+once the app is packaged.
+(anonymous) @ electron/js2c/renderer_init.js:111
+Promise.then (async)
+warnAboutInsecureCSP @ electron/js2c/renderer_init.js:111
+logSecurityWarnings @ electron/js2c/renderer_init.js:111
+(anonymous) @ electron/js2c/renderer_init.js:111
+main.js:16 received auth from index.js
+main.js:27 {nsdaMemberNumber: "10690029", nsdaPoints: "135", districtTournament: true, nsdaAffiliation: "College Prep", latestNsdaHonor: "Honor", …}
+main.js:147 refereshed
+main.js:172 Uncaught TypeError: Cannot read property 'oppoent' of undefined
+    at main.js:172
+    at Request.callback (index.js:890)
+    at IncomingMessage.<anonymous> (index.js:1130)
+    at IncomingMessage.emit (events.js:327)
+    at endReadableNT (_stream_readable.js:1220)
+    at processTicksAndRejections (internal/process/task_queues.js:84)
+(anonymous) @ main.js:172
+Request.callback @ index.js:890
+(anonymous) @ index.js:1130
+emit @ events.js:327
+endReadableNT @ _stream_readable.js:1220
+processTicksAndRejections @ internal/process/task_queues.js:84
+main.js:147 refereshed
+main.js:172 Uncaught TypeError: Cannot read property 'oppoent' of undefined
+    at main.js:172
+    at Request.callback (index.js:890)
+    at IncomingMessage.<anonymous> (index.js:1130)
+    at IncomingMessage.emit (events.js:327)
+    at endReadableNT (_stream_readable.js:1220)
+    at processTicksAndRejections (internal/process/task_queues.js:84)
+(anonymous) @ main.js:172
+Request.callback @ index.js:890
+(anonymous) @ index.js:1130
+emit @ events.js:327
+endReadableNT @ _stream_readable.js:1220
+processTicksAndRejections @ internal/process/task_queues.js:84
+main.js:147 refereshed
+main.js:172 Uncaught TypeError: Cannot read property 'oppoent' of undefined
+    at main.js:172
+    at Request.callback (index.js:890)
+    at IncomingMessage.<anonymous> (index.js:1130)
+    at IncomingMessage.emit (events.js:327)
+    at endReadableNT (_stream_readable.js:1220)
+    at processTicksAndRejections (internal/process/task_queues.js:84)
+(anonymous) @ main.js:172
+Request.callback @ index.js:890
+(anonymous) @ index.js:1130
+emit @ events.js:327
+endReadableNT @ _stream_readable.js:1220
+processTicksAndRejections @ internal/process/task_queues.js:84
