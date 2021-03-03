@@ -76,7 +76,7 @@ ipcMain.on('tabroomAuthorization', (event) => { // tabroom authorization
             //file exists
             authCredentials = require('./auth.json')
             superagent
-                .get('https://tabroomapi.herokuapp.com/me/test')
+                .post('https://tabroomapi.herokuapp.com/me/test')
                 .set('Content-Type', 'application/x-www-form-urlencoded')
                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
                 .end((err, res) => {

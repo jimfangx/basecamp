@@ -14,7 +14,7 @@ $('.tab-link').on("click", function () {
 
 function updateFuture(authCredentials) {
     superagent
-        .get('https://tabroomapi.herokuapp.com/me/future')
+        .post('https://tabroomapi.herokuapp.com/me/future')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
         .end((err, res) => {
@@ -111,7 +111,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
     const authCredentials = require('./auth.json')
 
     superagent
-        .get('https://tabroomapi.herokuapp.com/me')
+        .post('https://tabroomapi.herokuapp.com/me')
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
         .end((err, res) => {
@@ -124,7 +124,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
             $('.tab-link').on('click', function () {
                 //make the request here then send the results over to plop in a window
                 superagent
-                    .get('https://tabroomapi.herokuapp.com/me')
+                    .post('https://tabroomapi.herokuapp.com/me')
                     .set('Content-Type', 'application/x-www-form-urlencoded')
                     .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
                     .end((err, res) => {
@@ -135,7 +135,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
             // upcoming/current tournament
             //request for now tournaments, if not then exec below code
             superagent
-                .get('https://tabroomapi.herokuapp.com/me/current')
+                .post('https://tabroomapi.herokuapp.com/me/current')
                 // .get('http://localhost:8080/me/current') // Forcing active round by loading a html file of an active round
                 .set('Content-Type', 'application/x-www-form-urlencoded')
                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
@@ -156,13 +156,17 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
 
                         $('#refreshActiveRounds').on('click', function () { // refresh rounds btn
                             superagent
-                                .get('https://tabroomapi.herokuapp.com/me/current')
+                                .post('https://tabroomapi.herokuapp.com/me/current')
                                 // .get('http://localhost:8080/me/current') // Forcing active round by loading a html file of an active round
                                 .set('Content-Type', 'application/x-www-form-urlencoded')
                                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
                                 .end((err, res) => {
                                     if (res.statusCode === 200) {
                                         updateCurrent(res)
+                                        $('#dashboardOpenBtn').off('click')
+                                        $('#dashboardOpenBtn').on('click', function () { // update res.body with new refreshed round info/content
+                                            ipcRenderer.send('inRoundDashboardOpen', res.body[earlistElementNumber])
+                                        })
                                     } else { // if no more rounds & tournament ended (so no display in "current" tab)
                                         //reset active rounds info
                                         $('#mainTag').text(``).css('margin-top', "0%")

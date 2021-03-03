@@ -10,7 +10,7 @@ console.log(`ping`)
 ipcRenderer.on('currentRoundData', (event, data) => {
     console.log(data)
     superagent
-        .get(`https://tabroomapi.herokuapp.com/me/future`)
+        .post(`https://tabroomapi.herokuapp.com/me/future`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
         .end((err, res) => {
@@ -32,21 +32,21 @@ ipcRenderer.on('currentRoundData', (event, data) => {
             }
             console.log(res.body[earlistElementNumber].eventLink)
             superagent
-                .get(`https://tabroomapi.herokuapp.com/codeExtract`)
+                .post(`https://tabroomapi.herokuapp.com/codeExtract`)
                 .set('Content-Type', 'application/x-www-form-urlencoded')
                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "code":"${data.oppoent}", "eventLink":"${res.body[earlistElementNumber].eventLink}"}`))
                 .end((err, resExtract) => {
                     if (err) console.log(err)
                     console.log(resExtract.body)
                     superagent
-                        .get(`https://hspolicywikiapi.herokuapp.com/getpage`)
+                        .post(`https://hspolicywikiapi.herokuapp.com/getpage`)
                         .set('Content-Type', 'application/x-www-form-urlencoded')
                         .send(JSON.parse(`{"school":"${resExtract.body.school}", "entry":"${resExtract.body.entry}"}`))
                         .end((err, wikiPageRes) => {
                             if (err) console.log(err)
                             console.log(wikiPageRes.text)
                             superagent
-                                .get(`https://hspolicywikiapi.herokuapp.com/roundreports`)
+                                .post(`https://hspolicywikiapi.herokuapp.com/roundreports`)
                                 .set('Content-Type', 'application/x-www-form-urlencoded')
                                 .send(JSON.parse(`{"link":"${wikiPageRes.text}"}`))
                                 .end((err, roundReportRes) => {
