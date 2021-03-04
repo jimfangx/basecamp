@@ -14,6 +14,7 @@ ipcRenderer.on('currentRoundData', (event, data) => {
         .set('Content-Type', 'application/x-www-form-urlencoded')
         .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
         .end((err, res) => {
+            // assuming this call returns 200 ok
             var dateArray = []
             var earlistElementNumber = 0
             for (i = 0; i < res.body.length; i++) {
@@ -34,7 +35,8 @@ ipcRenderer.on('currentRoundData', (event, data) => {
             superagent
                 .post(`https://tabroomapi.herokuapp.com/codeExtract`)
                 .set('Content-Type', 'application/x-www-form-urlencoded')
-                .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "code":"${data.oppoent}", "eventLink":"${res.body[earlistElementNumber].eventLink}"}`))
+                // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "code":"${data.oppoent}", "eventLink":"${res.body[earlistElementNumber].eventLink}"}`)) // -> prod
+                .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "code":"${data.oppoent}", "eventLink":"${res.body[earlistElementNumber].eventLink.replace('https://www.tabroom.com', "")}"}`)) // -> dev
                 .end((err, resExtract) => {
                     if (err) console.log(err)
                     console.log(resExtract.body)

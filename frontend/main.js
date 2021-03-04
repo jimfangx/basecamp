@@ -99,6 +99,8 @@ function updateCurrent(res) {
     $('#datesAndStartTimes').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Date:</a> ${roundDate.toDateString()} ${res.body[earlistElementNumber].startTime.replace(dateReplaceFilter[roundDate.getDay()], "")}`)
     $('#round').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Round:</a> ${res.body[earlistElementNumber].roundNum}`)
     $('#codeAndEvent').html(`<a class="fs-4 text-muted" style="text-decoration: none;">Code & Event:</a> ${res.body[0].code} | ${res.body[0].event}`)
+
+    return earlistElementNumber
 }
 
 
@@ -107,7 +109,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
     console.log(`received auth from index.js`)
 
     // fs.writeFileSync('./auth.json', data)
-
+    var earlistElementNumber = null;
     const authCredentials = require('./auth.json')
 
     superagent
@@ -149,7 +151,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                             updateFuture(authCredentials)
                         })
                     } else if (res.statusCode == 200) { // there is a current round active (update the front page info)
-                        updateCurrent(res)
+                        earlistElementNumber = updateCurrent(res)
 
                         $('#dashboardOpenBtn').css('visibility', '')
                         $('#refreshActiveRounds').css('visibility', '')
@@ -162,7 +164,7 @@ ipcRenderer.on('tabroomAuthSuccessful', (event, data) => {
                                 .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "token":"${authCredentials.token}"}`))
                                 .end((err, res) => {
                                     if (res.statusCode === 200) {
-                                        updateCurrent(res)
+                                        earlistElementNumber = updateCurrent(res)
                                         $('#dashboardOpenBtn').off('click')
                                         $('#dashboardOpenBtn').on('click', function () { // update res.body with new refreshed round info/content
                                             ipcRenderer.send('inRoundDashboardOpen', res.body[earlistElementNumber])
