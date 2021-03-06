@@ -9,6 +9,8 @@ const authCredentials = require('./auth.json')
 console.log(`ping`)
 ipcRenderer.on('currentRoundData', (event, data) => {
     console.log(data)
+
+
     superagent
         .post(`https://tabroomapi.herokuapp.com/me/future`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -31,7 +33,7 @@ ipcRenderer.on('currentRoundData', (event, data) => {
                     earlistElementNumber = i
                 }
             }
-            console.log(res.body[earlistElementNumber].eventLink)
+            console.log(res.body[earlistElementNumber])
             superagent
                 .post(`https://tabroomapi.herokuapp.com/codeExtract`)
                 .set('Content-Type', 'application/x-www-form-urlencoded')
@@ -41,7 +43,7 @@ ipcRenderer.on('currentRoundData', (event, data) => {
                     if (err) console.log(err)
                     console.log(resExtract.body)
                     superagent
-                        .post(`https://hspolicywikiapi.herokuapp.com/getpage`)
+                        .post(`https://hspolicywikiapi.herokuapp.com/getPage`)
                         .set('Content-Type', 'application/x-www-form-urlencoded')
                         .send(JSON.parse(`{"school":"${resExtract.body.school}", "entry":"${resExtract.body.entry}"}`))
                         .end((err, wikiPageRes) => {
@@ -56,7 +58,26 @@ ipcRenderer.on('currentRoundData', (event, data) => {
                                     console.log(roundReportRes.body)
                                 })
                         })
+
+                    superagent // get oppoent record @ that tournament
+                        .post(`https://tabroomapi.herokuapp.com/getprelimrecord`)
+                        .set('Content-Type', 'application/x-www-form-urlencoded')
+                        // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "eventLink":"${res.body[earlistElementNumber].eventLink}", "code":"${data.oppoent}"}`))
+                        .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "eventLink":"${res.body[earlistElementNumber].eventLink.replace('https://www.tabroom.com', "")}", "code":"${data.oppoent}"}`))
+                        .end((err, prelimRecordRes) => {
+                            if (err) console.log(err)
+                            console.log(prelimRecordRes.body)
+                        })
+
                 })
         })
+    superagent
+        .post(`https://tabroomapi.herokuapp.com/paradigm`)
+        .set('Content-Type', 'application/x-www-form-urlencoded')
+        // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink}"}`))
+        .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`))
+        .end((err, paradigmRes) => {
+            console.log(paradigmRes.body)
+        });
 
 })
