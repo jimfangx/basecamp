@@ -4,10 +4,13 @@ const { ipcRenderer } = electron;
 const superagent = require('superagent')
 const config = require('./config.json')
 const authCredentials = require('./auth.json')
+const polWords = require('./polWords.json');
+const { resolve } = require('path');
+const { rejects } = require('assert');
 
 // wiki module
 console.log(`ping`)
-ipcRenderer.on('currentRoundData', (event, data) => {
+ipcRenderer.on('currentRoundData', async (event, data) => {
     console.log(data)
 
 
@@ -71,13 +74,57 @@ ipcRenderer.on('currentRoundData', (event, data) => {
 
                 })
         })
+
+
     superagent
         .post(`https://tabroomapi.herokuapp.com/paradigm`)
         .set('Content-Type', 'application/x-www-form-urlencoded')
         // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink}"}`))
-        .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`))
-        .end((err, paradigmRes) => {
+        .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"100", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`))
+        .end(async (err, paradigmRes) => {
+            var result = await voteAnalysis(paradigmRes)
+            console.log(result)
+        })
+    async function voteAnalysis(paradigmRes) {
+        return new Promise((resolve, reject) => {
             console.log(paradigmRes.body)
-        });
+
+            var dateYearAgo = new Date()
+            dateYearAgo.setUTCHours(0, 0, 0)
+            dateYearAgo.setFullYear(dateYearAgo.getFullYear() - 1)
+
+            var votingAnalysis = {
+                "totalAff": 0,
+                "totalNeg": 0,
+                "pastYearAff": 0,
+                "pastYearNeg": 0,
+                "totalCXRounds": 0,
+                "totalCXRoundsPastYear": 0
+            }
+
+            for (i = 2; i < paradigmRes.body.length; i++) { // avoid padadigm raw text (first 2)
+                if (polWords.some(v => paradigmRes.body[i].event.toLowerCase().includes(v))) {
+                    if (paradigmRes.body[i].judgeVote.toLowerCase() === 'aff') {
+                        if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) { // valueOf() returns in ms, while tab's is in seconds
+                            votingAnalysis.pastYearAff++
+                            votingAnalysis.totalCXRoundsPastYear++
+                        }
+                        votingAnalysis.totalAff++
+                        votingAnalysis.totalCXRounds++
+                    }
+                    if (paradigmRes.body[i].judgeVote.toLowerCase() === 'neg') {
+                        if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) {
+                            votingAnalysis.pastYearNeg++
+                            votingAnalysis.totalCXRoundsPastYear++
+                        }
+                        votingAnalysis.totalNeg++
+                        votingAnalysis.totalCXRounds++
+
+                    }
+                }
+            }
+            resolve(votingAnalysis)
+        })
+    }
 
 })
