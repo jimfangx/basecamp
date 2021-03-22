@@ -23,6 +23,9 @@ ipcRenderer.on('currentRoundData', async (event, data) => {
     console.log(roundreportsResult)
     var getprelimrecordResults = await getprelimrecord(config, getFutureResult, data)
     console.log(getprelimrecordResults)
+    var judgeAnalysisResults = await judgeAnalysis(config, data)
+    console.log(judgeAnalysisResults)
+    
 
     async function getFuture(config, authCredentials) {
         return new Promise((resolve, reject) => {
@@ -109,56 +112,63 @@ ipcRenderer.on('currentRoundData', async (event, data) => {
     }
 
 
+    async function judgeAnalysis(config, data) {
+        return new Promise((resolve, reject) => {
+            superagent
+                .post(`https://tabroomapi.herokuapp.com/paradigm`)
+                .set('Content-Type', 'application/x-www-form-urlencoded')
+                .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink}"}`)) // --> prod
+                // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"100", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`)) // --> dev
+                .end(async (err, paradigmRes) => {
+                    var result = await voteAnalysis(paradigmRes)
+                    resolve(result)
+                })
+        })
+    }
 
-    // superagent
-    //     .post(`https://tabroomapi.herokuapp.com/paradigm`)
-    //     .set('Content-Type', 'application/x-www-form-urlencoded')
-    //     .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "link":"${data.paradigmLink}"}`)) // --> prod
-    //     // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"100", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`)) // --> dev
-    //     .end(async (err, paradigmRes) => { 
-    //         var result = await voteAnalysis(paradigmRes)
-    //         console.log(result)
-    //     })
-    // async function voteAnalysis(paradigmRes) {
-    //     return new Promise((resolve, reject) => {
-    //         console.log(paradigmRes.body)
 
-    //         var dateYearAgo = new Date()
-    //         dateYearAgo.setUTCHours(0, 0, 0)
-    //         dateYearAgo.setFullYear(dateYearAgo.getFullYear() - 1)
+    async function voteAnalysis(paradigmRes) {
+        return new Promise((resolve, reject) => {
+            console.log(paradigmRes.body)
 
-    //         var votingAnalysis = {
-    //             "totalAff": 0,
-    //             "totalNeg": 0,
-    //             "pastYearAff": 0,
-    //             "pastYearNeg": 0,
-    //             "totalCXRounds": 0,
-    //             "totalCXRoundsPastYear": 0
-    //         }
+            var dateYearAgo = new Date()
+            dateYearAgo.setUTCHours(0, 0, 0)
+            dateYearAgo.setFullYear(dateYearAgo.getFullYear() - 1)
 
-    //         for (i = 2; i < paradigmRes.body.length; i++) { // avoid padadigm raw text (first 2)
-    //             if (polWords.some(v => paradigmRes.body[i].event.toLowerCase().includes(v))) {
-    //                 if (paradigmRes.body[i].judgeVote.toLowerCase() === 'aff') {
-    //                     if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) { // valueOf() returns in ms, while tab's is in seconds
-    //                         votingAnalysis.pastYearAff++
-    //                         votingAnalysis.totalCXRoundsPastYear++
-    //                     }
-    //                     votingAnalysis.totalAff++
-    //                     votingAnalysis.totalCXRounds++
-    //                 }
-    //                 if (paradigmRes.body[i].judgeVote.toLowerCase() === 'neg') {
-    //                     if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) {
-    //                         votingAnalysis.pastYearNeg++
-    //                         votingAnalysis.totalCXRoundsPastYear++
-    //                     }
-    //                     votingAnalysis.totalNeg++
-    //                     votingAnalysis.totalCXRounds++
+            var votingAnalysis = {
+                "totalAff": 0,
+                "totalNeg": 0,
+                "pastYearAff": 0,
+                "pastYearNeg": 0,
+                "totalCXRounds": 0,
+                "totalCXRoundsPastYear": 0
+            }
 
-    //                 }
-    //             }
-    //         }
-    //         resolve(votingAnalysis)
-    //     })
-    // }
+            for (i = 2; i < paradigmRes.body.length; i++) { // avoid padadigm raw text (first 2)
+                if (polWords.some(v => paradigmRes.body[i].event.toLowerCase().includes(v))) {
+                    if (paradigmRes.body[i].judgeVote.toLowerCase() === 'aff') {
+                        if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) { // valueOf() returns in ms, while tab's is in seconds
+                            votingAnalysis.pastYearAff++
+                            votingAnalysis.totalCXRoundsPastYear++
+                        }
+                        votingAnalysis.totalAff++
+                        votingAnalysis.totalCXRounds++
+                    }
+                    if (paradigmRes.body[i].judgeVote.toLowerCase() === 'neg') {
+                        if (paradigmRes.body[i].timestamp > (dateYearAgo.valueOf() / 1000)) {
+                            votingAnalysis.pastYearNeg++
+                            votingAnalysis.totalCXRoundsPastYear++
+                        }
+                        votingAnalysis.totalNeg++
+                        votingAnalysis.totalCXRounds++
+
+                    }
+                }
+            }
+            resolve(votingAnalysis)
+        })
+    }
+
+
 
 })
