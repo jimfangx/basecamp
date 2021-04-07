@@ -1,0 +1,8 @@
+#judgeParadigmText {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+#judgeParadigmText .card-header{
+    background-color: rgba(247, 247, 247);
+}

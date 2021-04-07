@@ -28,7 +28,12 @@ async function computeEditInfo(data) {
     var getprelimrecordResults = await getprelimrecord(config, getFutureResult, data)
     console.log(getprelimrecordResults)
     var judgeAnalysisResults = await judgeAnalysis(config, data)
+    var judgeParadigm = judgeAnalysisResults[0]
+    judgeAnalysisResults = judgeAnalysisResults[1]
+    console.log(judgeParadigm)
     console.log(judgeAnalysisResults)
+    var pastYearPercents = largestRemainderRound([(judgeAnalysisResults.pastYearAff / judgeAnalysisResults.totalCXRoundsPastYear) * 100, (judgeAnalysisResults.pastYearNeg / judgeAnalysisResults.totalCXRoundsPastYear) * 100], 100)
+    var overallPercents = largestRemainderRound([(judgeAnalysisResults.totalAff / judgeAnalysisResults.totalCXRounds) * 100, (judgeAnalysisResults.totalNeg / judgeAnalysisResults.totalCXRounds) * 100], 100)
 
     $('#tournTitle').text(getFutureResult.name)
     $('#tournDate').text(getFutureResult.date)
@@ -39,7 +44,11 @@ async function computeEditInfo(data) {
     $('#opponentRecord').append(`${getprelimrecordResults.record} W`)
     $('#opponentRecordLink').attr('href', getprelimrecordResults.recordLink)
 
-    
+
+    $('#judgeName').append(data.judge)
+    $('#judgeAnalytics').html(`Total CX Rounds in the Past Year (${new Date().getFullYear() - 1}-${new Date().getFullYear()}): ${judgeAnalysisResults.totalCXRoundsPastYear}<br>% Aff Ballots in the Past Year: ${pastYearPercents[0]}%<br>% Neg Ballots in the Past Year: ${pastYearPercents[1]}%<br><br>Total CX Rounds (Most Recent 100 Rds): ${judgeAnalysisResults.totalCXRounds}<br>% Total Aff Ballots: ${overallPercents[0]}%<br>% Total Neg Ballots: ${overallPercents[1]}%`)
+    $('#judgeParadigmLink').attr('href', data.paradigmLink)
+    $('#judgeParadigmBody').html(judgeParadigm.replace(/<br>/g, '<br><br>'))
 }
 
 
@@ -181,6 +190,39 @@ async function voteAnalysis(paradigmRes) {
                 }
             }
         }
-        resolve(votingAnalysis)
+
+        resolve([paradigmRes.body[1], votingAnalysis])
     })
+}
+
+function largestRemainderRound(numbers, desiredTotal) {
+    var result = numbers.map(function (number, index) {
+        return {
+            floor: Math.floor(number),
+            remainder: getRemainder(number),
+            index: index,
+        };
+    }).sort(function (a, b) {
+        return b.remainder - a.remainder;
+    });
+
+    var lowerSum = result.reduce(function (sum, current) {
+        return sum + current.floor;
+    }, 0);
+
+    var delta = desiredTotal - lowerSum;
+    for (var i = 0; i < delta; i++) {
+        result[i].floor++;
+    }
+
+    return result.sort(function (a, b) {
+        return a.index - b.index;
+    }).map(function (result) {
+        return result.floor;
+    });
+}
+
+function getRemainder(number) {
+    var remainder = number - Math.floor(number);
+    return remainder.toFixed(4);
 }
