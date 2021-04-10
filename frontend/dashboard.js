@@ -32,6 +32,8 @@ async function computeEditInfo(data) {
     judgeAnalysisResults = judgeAnalysisResults[1]
     console.log(judgeParadigm)
     console.log(judgeAnalysisResults)
+    var nsdaCampusLink = await getNsdaCampusLink(config, data)
+    console.log(nsdaCampusLink)
     var pastYearPercents = largestRemainderRound([(judgeAnalysisResults.pastYearAff / judgeAnalysisResults.totalCXRoundsPastYear) * 100, (judgeAnalysisResults.pastYearNeg / judgeAnalysisResults.totalCXRoundsPastYear) * 100], 100)
     var overallPercents = largestRemainderRound([(judgeAnalysisResults.totalAff / judgeAnalysisResults.totalCXRounds) * 100, (judgeAnalysisResults.totalNeg / judgeAnalysisResults.totalCXRounds) * 100], 100)
 
@@ -41,7 +43,7 @@ async function computeEditInfo(data) {
 
     $('#opponentEntryCode').append(codeExtractResult.code)
     $('#opponentEntry').append(codeExtractResult.entry)
-    $('#opponentRecord').append(`${getprelimrecordResults.record} W`)
+    $('#opponentRecord').append(`${getprelimrecordResults.recordW} W ${getprelimrecordResults.recordL} L`)
     $('#opponentRecordLink').attr('href', getprelimrecordResults.recordLink)
 
 
@@ -49,6 +51,16 @@ async function computeEditInfo(data) {
     $('#judgeAnalytics').html(`Total CX Rounds in the Past Year (${new Date().getFullYear() - 1}-${new Date().getFullYear()}): ${judgeAnalysisResults.totalCXRoundsPastYear}<br>% Aff Ballots in the Past Year: ${pastYearPercents[0]}%<br>% Neg Ballots in the Past Year: ${pastYearPercents[1]}%<br><br>Total CX Rounds (Most Recent 100 Rds): ${judgeAnalysisResults.totalCXRounds}<br>% Total Aff Ballots: ${overallPercents[0]}%<br>% Total Neg Ballots: ${overallPercents[1]}%`)
     $('#judgeParadigmLink').attr('href', data.paradigmLink)
     $('#judgeParadigmBody').html(judgeParadigm.replace(/<br>/g, '<br><br>'))
+
+    $("#jitsiEmbed").attr('src', nsdaCampusLink)
+    $('#jitsiLink').on('click', function () {
+        var tempInput = document.createElement("input");
+        tempInput.value = nsdaCampusLink;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand("copy");
+        document.body.removeChild(tempInput);
+    })
 }
 
 
@@ -143,7 +155,7 @@ async function judgeAnalysis(config, data) {
             .post(`https://tabroomapi.herokuapp.com/paradigm`)
             .set('Content-Type', 'application/x-www-form-urlencoded')
             // .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"100", "link":"${data.paradigmLink}"}`)) // --> prod
-            .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"100", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`)) // --> dev
+            .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "type":"link", "roundLimit":"200", "basecamp":"true", "link":"${data.paradigmLink.replace('https://www.tabroom.com', "")}"}`)) // --> dev
             .end(async (err, paradigmRes) => {
                 var result = await voteAnalysis(paradigmRes)
                 resolve(result)
@@ -192,6 +204,19 @@ async function voteAnalysis(paradigmRes) {
         }
 
         resolve([paradigmRes.body[1], votingAnalysis])
+    })
+}
+
+async function getNsdaCampusLink(config, data) {
+    return new Promise((resolve, reject) => {
+        console.log(data.nsdaCampusJWT)
+        superagent
+            .post(`https://tabroomapi.herokuapp.com/jitsiurl`)
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "jwt":"${data.nsdaCampusJWT}"}`))
+            .end(async (err, jitsiLinkRes) => {
+                resolve(jitsiLinkRes.text + "#config.startWithAudioMuted=true&config.startWithVideoMuted=true")
+            })
     })
 }
 
