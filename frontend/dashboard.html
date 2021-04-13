@@ -50,13 +50,27 @@
                     <h3>
                         Opponent Wiki Info
                     </h3>
-                    <h4>
+                    <h4 id="wikiRdsListed">
                         # of Rounds Listed:
                     </h4>
-                    <h5>
+                    <h5 id="wikiRecentEntry">
                         Most Recent Entry:
-                        <!-- this is variable, if user is aff then shows neg, else: reverse -->
                     </h5>
+                    <div id="wikiRecentEntryDropdown">
+                        <div class="card">
+                            <div class="card-header">
+                                <a class="card-link" data-toggle="collapse" data-parent="#wikiRecentEntryDropdown"
+                                    href="#wikiDropdownCardElement">Latest Entry Details</a>
+                            </div>
+                            <div id="wikiDropdownCardElement" class="collapse ">
+                                <div class="card-body" id="wikiEntryData">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- this is variable, if user is aff then shows neg, else: reverse -->
 
                     <p>
                         <a class="btn btn-primary btn-large" href="#">Opponent Wiki</a>
@@ -105,12 +119,13 @@
 
                     </div>
                 </div>
-                <div class="jumbotron">
+                <div class="jumbotron" id="jitsiJumbotron">
                     <h3>
                         Jitsi/NSDA Campus
                     </h3>
                     <div>
-                        <iframe src="https://example.com" frameborder="0" id="jitsiEmbed" allow="camera; microphone" height="500px" width="600px"></iframe>
+                        <iframe src="https://example.com" frameborder="0" id="jitsiEmbed" allow="camera; microphone"
+                            height="500px" width="600px"></iframe>
                     </div>
                     <p>
                         <a class="btn btn-primary btn-large" href="#" id="jitsiLink">Copy Link</a>

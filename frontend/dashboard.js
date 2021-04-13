@@ -34,6 +34,8 @@ async function computeEditInfo(data) {
     console.log(judgeAnalysisResults)
     var nsdaCampusLink = await getNsdaCampusLink(config, data)
     console.log(nsdaCampusLink)
+    var hspolicyWikiAnalysis = await opponentWikiAnalysis(config, getPageResult)
+    console.log(hspolicyWikiAnalysis)
     var pastYearPercents = largestRemainderRound([(judgeAnalysisResults.pastYearAff / judgeAnalysisResults.totalCXRoundsPastYear) * 100, (judgeAnalysisResults.pastYearNeg / judgeAnalysisResults.totalCXRoundsPastYear) * 100], 100)
     var overallPercents = largestRemainderRound([(judgeAnalysisResults.totalAff / judgeAnalysisResults.totalCXRounds) * 100, (judgeAnalysisResults.totalNeg / judgeAnalysisResults.totalCXRounds) * 100], 100)
 
@@ -53,6 +55,7 @@ async function computeEditInfo(data) {
     $('#judgeParadigmBody').html(judgeParadigm.replace(/<br>/g, '<br><br>'))
 
     $("#jitsiEmbed").attr('src', nsdaCampusLink)
+    $('#jitsiEmbed').width($('#jitsiJumbotron').width())
     $('#jitsiLink').on('click', function () {
         var tempInput = document.createElement("input");
         tempInput.value = nsdaCampusLink;
@@ -61,6 +64,11 @@ async function computeEditInfo(data) {
         document.execCommand("copy");
         document.body.removeChild(tempInput);
     })
+
+    var wikiEntryDate = new Date(hspolicyWikiAnalysis[1].entryDate)
+    $('#wikiRdsListed').append(hspolicyWikiAnalysis[0] + "")
+    $('#wikiRecentEntry').append(hspolicyWikiAnalysis[1].tournament)
+    $('#wikiEntryData').html(`Date: ${wikiEntryDate.toDateString()}<br>Round: ${hspolicyWikiAnalysis[1].round}<br>Opponent: ${hspolicyWikiAnalysis[1].opponent}<br>Judge: ${hspolicyWikiAnalysis[1].judge}`)
 }
 
 
@@ -216,6 +224,38 @@ async function getNsdaCampusLink(config, data) {
             .send(JSON.parse(`{"apiauth":"${config.tabroomAPIKey}", "jwt":"${data.nsdaCampusJWT}"}`))
             .end(async (err, jitsiLinkRes) => {
                 resolve(jitsiLinkRes.text + "#config.startWithAudioMuted=true&config.startWithVideoMuted=true")
+            })
+    })
+}
+
+async function opponentWikiAnalysis(config, getPageResult) { // so far only for aff - no neg support yet - api support for that should (hopefully) be coming soon
+    return new Promise((resolve, reject) => {
+        console.log(getPageResult)
+        superagent
+            .post(`https://hspolicywikiapi.herokuapp.com/latestEntry`)
+            .set('Content-Type', 'application/x-www-form-urlencoded')
+            // .send(JSON.parse(`{"apiauth":"${config.hspolicyAPIKey}", "link":"${getPageResult}"}`))
+            .send(JSON.parse(`{"link":"${getPageResult}"}`))
+            .end(async (err, opponentWikiRes) => {
+                console.log(opponentWikiRes.body)
+                var datesForSort = []
+                var dateTemp;
+                var latestObj;
+                console.log(opponentWikiRes.body.length)
+                for (i = 0; i < opponentWikiRes.body.length; i++) {
+                    dateTemp = new Date(opponentWikiRes.body[i].entryDate)
+                    datesForSort.push(+ dateTemp)
+                }
+                datesForSort.sort(function (a, b) {
+                    return a - b;
+                });
+                for (i = 0; i < opponentWikiRes.body.length; i++) {
+                    dateTemp = new Date(opponentWikiRes.body[i].entryDate)
+                    if (+ dateTemp === datesForSort[datesForSort.length - 1]) {
+                        latestObj = opponentWikiRes.body[i]
+                    }
+                }
+                resolve([opponentWikiRes.body.length, latestObj])
             })
     })
 }
