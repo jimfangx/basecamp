@@ -21,7 +21,7 @@
     "cheerio": "^1.0.0-rc.3",
     "detergent": "^5.11.1",
     "express": "^4.17.1",
-    "follow-redirects": "^1.13.0",
+    "follow-redirects": "^1.14.7",
     "google-scholar-link": "^1.0.1",
     "html-to-docx": "^1.1.29",
     "moment": "^2.27.0",
