@@ -24,7 +24,7 @@
     "follow-redirects": "^1.13.0",
     "google-scholar-link": "^1.0.1",
     "html-to-docx": "^1.1.29",
-    "moment": "^2.27.0",
+    "moment": "^2.29.2",
     "puppeteer": "^3.3.0",
     "querystring": "^0.2.0",
     "request": "^2.88.2",
